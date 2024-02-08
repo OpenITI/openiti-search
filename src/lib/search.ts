@@ -25,22 +25,6 @@ export const searchAuthors = async (q: string) => {
         //     },
         //   },
         // ],
-        // must: [
-        //   {
-        //     multi_match: {
-        //       query: q,
-        //       type: "bool_prefix",
-        //       fields: [
-        //         "arabicNames.search_as_you_type",
-        //         "arabicNames.search_as_you_type._2gram",
-        //         "arabicNames.search_as_you_type._3gram",
-        //         "latinNames.search_as_you_type",
-        //         "latinNames.search_as_you_type._2gram",
-        //         "latinNames.search_as_you_type._3gram",
-        //       ],
-        //     },
-        //   },
-        // ],
         should: [
           // boost exact matches
           {
@@ -63,54 +47,52 @@ export const searchAuthors = async (q: string) => {
           },
           {
             match: {
-              "arabicNames.search_as_you_type": {
-                query: q,
-                boost: 1, // Boosting relevance score for exact matches in Arabic names
-              },
-            },
-          },
-          {
-            match: {
-              "latinNames.search_as_you_type": {
-                query: q,
-                boost: 1, // Boosting for exact matches in Latin names
-              },
-            },
-          },
-          {
-            match_phrase: {
-              "arabicNames.search_as_you_type": {
+              arabicNames: {
                 query: q,
                 boost: 2, // Boosting relevance score for exact matches in Arabic names
               },
             },
           },
           {
-            match_phrase: {
-              "latinNames.search_as_you_type": {
+            match: {
+              latinNames: {
                 query: q,
                 boost: 2, // Boosting for exact matches in Latin names
+              },
+            },
+          },
+          {
+            match_phrase: {
+              arabicNames: {
+                query: q,
+                boost: 3, // Boosting relevance score for exact matches in Arabic names
+              },
+            },
+          },
+          {
+            match_phrase: {
+              latinNames: {
+                query: q,
+                boost: 3, // Boosting for exact matches in Latin names
               },
             },
           },
           // it can match the prefix as well
           {
             match_phrase_prefix: {
-              "arabicNames.search_as_you_type": {
+              arabicNames: {
                 query: q,
                 slop: PREFIX_SLOP, // Allow for a small number of additional words in the match
-                boost: 2, // Boosting for matches with a small number of additional words
-                max_expansions: 1,
+                boost: 3, // Boosting for matches with a small number of additional words
               },
             },
           },
           {
             match_phrase_prefix: {
-              "latinNames.search_as_you_type": {
+              latinNames: {
                 query: q,
                 slop: PREFIX_SLOP, // Allow for a small number of additional words in the match
-                boost: 2, // Boosting for matches with a small number of additional words
-                max_expansions: 1,
+                boost: 3, // Boosting for matches with a small number of additional words
               },
             },
           },
@@ -167,13 +149,13 @@ export const searchAuthors = async (q: string) => {
       },
     },
     _source: ["id", "arabicNames", "latinNames", "shuhra"],
-    // sort: [
-    //   {
-    //     _score: {
-    //       order: "desc",
-    //     },
-    //   },
-    // ],
+    sort: [
+      {
+        _score: {
+          order: "desc",
+        },
+      },
+    ],
     size: 5, // limit to 3 results
   });
 
