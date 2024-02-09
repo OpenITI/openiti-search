@@ -1,10 +1,11 @@
 "use client";
 
-import { search } from "@/lib/search";
+import { search } from "@/lib/meilisearch-search";
 import { useSettings } from "@/stores/settings";
 import { type BookDocument } from '@/types/book';
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
+
 
 function useDebounce<T>(value: T, delay?: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -66,7 +67,7 @@ export default function HomePage() {
             href="https://github.com/OpenITI/RELEASE"
             className="text-amber-700"
           >
-            OpenITI Corpus (Elasticsearch)
+            OpenITI Corpus (Meilisearch)
           </a>
         </h1>
 
@@ -97,9 +98,9 @@ export default function HomePage() {
                 <h2 className="text-2xl">Authors</h2>
 
                 <div className="mt-2 flex flex-col gap-5">
-                  {results.authors.length > 0 ? (
-                    results.authors.map((result) => {
-                      const document = result._source!;
+                  {(results.authors.hits?.length ?? 0) > 0 ? (
+                    results.authors.hits!.map((result) => {
+                      const document = result;
 
                       let authorNames =
                         language === "ar"
@@ -111,6 +112,7 @@ export default function HomePage() {
                             ? document.latinNames
                             : document.arabicNames;
                       }
+                      
 
                       const firstName = authorNames.sort(
                         (a, b) => a.length - b.length,
@@ -119,7 +121,7 @@ export default function HomePage() {
 
                       return (
                         <a
-                          key={result._id}
+                          key={document.id}
                           className="relative w-full rounded-md bg-white px-4 py-4 pt-4 shadow-md"
                           href={`https://github.com/OpenITI/RELEASE/tree/2385733573ab800b5aea09bc846b1d864f475476/data/${document.id}`}
                         >
@@ -145,28 +147,29 @@ export default function HomePage() {
                 <h2 className="text-2xl">Books</h2>
 
                 <div className="mt-2 flex flex-col gap-5">
-                  {results.books.length > 0 ? (
-                    results.books.map((result) => {
-                      const document = result._source!;
-                      const highlight = result.highlight;
-
+                  {(results.books.hits?.length ?? 0) > 0 ? (
+                    results.books.hits!.map((result) => {
+                      const document = result;
+               
+                      
                       let fieldToUse: keyof BookDocument = language === "ar" ? "arabicNames" : "latinNames";
                       if (document[fieldToUse].length === 0) {
                         fieldToUse = document.latinNames.length > 0 ? "latinNames" : "arabicNames";
                       }
 
-                      const bookNames = (highlight?.[fieldToUse] && highlight?.[(fieldToUse as any)]!.length > 0 ? highlight?.[fieldToUse] : document[fieldToUse])!;
+                      // const bookNames = (highlight?.[fieldToUse] && highlight?.[(fieldToUse as any)]!.length > 0 ? highlight?.[fieldToUse] : document[fieldToUse])!;
+                      const bookNames = document[fieldToUse];
 
                       const [firstName, ...otherNames] = bookNames.sort(
                         (a, b) => a.length - b.length,
                       ) as [string];
                     
 
-                      const slug = `${document.author}/${document.id}`;
+                      const slug = `${document.authorId}/${document.id}`;
 
                       return (
                         <a
-                          key={result._id}
+                          key={document.id}
                           className="elative w-full rounded-md bg-white px-4 py-4 pt-4 shadow-md"
                           href={`https://github.com/OpenITI/RELEASE/tree/2385733573ab800b5aea09bc846b1d864f475476/data/${slug}`}
                         >

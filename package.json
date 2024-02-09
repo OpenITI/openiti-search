@@ -7,15 +7,19 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "index-authors": "dotenv npx tsx scripts/index-authors.ts",
+    "index-titles": "dotenv npx tsx scripts/index-titles.ts"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.12.1",
     "@heroicons/react": "^2.1.1",
     "@t3-oss/env-nextjs": "^0.7.1",
+    "meilisearch": "^0.37.0",
     "next": "^14.0.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "typesense": "^1.7.2",
     "zod": "^3.22.4",
     "zustand": "^4.5.0"
   },
