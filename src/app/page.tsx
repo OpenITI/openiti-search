@@ -66,7 +66,7 @@ export default function HomePage() {
             href="https://github.com/OpenITI/RELEASE"
             className="text-amber-700"
           >
-            OpenITI Corpus (Elasticsearch)
+            OpenITI Corpus (Typesense)
           </a>
         </h1>
 
@@ -97,41 +97,40 @@ export default function HomePage() {
                 <h2 className="text-2xl">Authors</h2>
 
                 <div className="mt-2 flex flex-col gap-5">
-                  {results.authors.length > 0 ? (
-                    results.authors.map((result) => {
-                      const document = result._source!;
+                  {(results.authors.hits?.length ?? 0) > 0 ? (
+                    results.authors.hits!.map((result) => {
+                      const document = result.document;
 
-                      let authorNames =
-                        language === "ar"
-                          ? document.arabicNames
-                          : document.latinNames;
-                      if (authorNames.length === 0) {
-                        authorNames =
-                          document.latinNames.length > 0
-                            ? document.latinNames
-                            : document.arabicNames;
-                      }
+                      // let authorNames =
+                      //   language === "ar"
+                      //     ? document.arabicNames
+                      //     : document.latinNames;
+                      // if (authorNames.length === 0) {
+                      //   authorNames =
+                      //     document.latinNames.length > 0
+                      //       ? document.latinNames
+                      //       : document.arabicNames;
+                      // }
+                      
 
-                      const firstName = authorNames.sort(
-                        (a, b) => a.length - b.length,
-                      )[0];
-                      const otherNames = authorNames;
+                      // const firstName = authorNames.sort(
+                      //   (a, b) => a.length - b.length,
+                      // )[0];
+                      // const otherNames = authorNames;
 
                       return (
                         <a
-                          key={result._id}
+                          key={document.id}
                           className="relative w-full rounded-md bg-white px-4 py-4 pt-4 shadow-md"
                           href={`https://github.com/OpenITI/RELEASE/tree/2385733573ab800b5aea09bc846b1d864f475476/data/${document.id}`}
                         >
                           <h2 className="text-lg text-slate-900">
-                            {firstName}
+                            {document.primaryArabicName}
                           </h2>
 
-                          {otherNames.length > 0 && (
-                            <p className="mt-2 text-slate-600">
-                              {otherNames.join(", ")}
-                            </p>
-                          )}
+                          <h2 className="text-lg text-slate-900 mt-2">
+                            {document.primaryLatinName}
+                          </h2>
                         </a>
                       );
                     })
@@ -145,28 +144,28 @@ export default function HomePage() {
                 <h2 className="text-2xl">Books</h2>
 
                 <div className="mt-2 flex flex-col gap-5">
-                  {results.books.length > 0 ? (
-                    results.books.map((result) => {
-                      const document = result._source!;
-                      const highlight = result.highlight;
-
+                  {(results.books.hits?.length ?? 0) > 0 ? (
+                    results.books.hits!.map((result) => {
+                      const document = result.document;
+                      
                       let fieldToUse: keyof BookDocument = language === "ar" ? "arabicNames" : "latinNames";
                       if (document[fieldToUse].length === 0) {
                         fieldToUse = document.latinNames.length > 0 ? "latinNames" : "arabicNames";
                       }
 
-                      const bookNames = (highlight?.[fieldToUse] && highlight?.[(fieldToUse as any)]!.length > 0 ? highlight?.[fieldToUse] : document[fieldToUse])!;
+                      // const bookNames = (highlight?.[fieldToUse] && highlight?.[(fieldToUse as any)]!.length > 0 ? highlight?.[fieldToUse] : document[fieldToUse])!;
+                      const bookNames = document[fieldToUse];
 
                       const [firstName, ...otherNames] = bookNames.sort(
                         (a, b) => a.length - b.length,
                       ) as [string];
                     
 
-                      const slug = `${document.author}/${document.id}`;
+                      const slug = `${document.authorId}/${document.id}`;
 
                       return (
                         <a
-                          key={result._id}
+                          key={document.id}
                           className="elative w-full rounded-md bg-white px-4 py-4 pt-4 shadow-md"
                           href={`https://github.com/OpenITI/RELEASE/tree/2385733573ab800b5aea09bc846b1d864f475476/data/${slug}`}
                         >

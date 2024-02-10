@@ -1,7 +1,9 @@
 export type AuthorDocument = {
   id: string;
   year: number;
-  arabicNames: string[];
-  latinNames: string[];
+  primaryArabicName: string;
+  otherArabicNames: string[];
+  primaryLatinName: string;
+  otherLatinNames: string[];
   shuhra: string;
 };
