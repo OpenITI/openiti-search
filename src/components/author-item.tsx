@@ -77,7 +77,7 @@ const AuthorItem = ({
             <p className="text-xl font-bold">Books:</p>
             <div className="mt-3 grid grid-cols-1 items-end gap-y-5 sm:grid-cols-2 sm:gap-x-20">
               {document.books.map((book) => {
-                const slug = `${book.authorId}/${book.id}`;
+                const slug = `${document.id}/${book.id}`;
                 const githubUrl = `https://github.com/OpenITI/RELEASE/tree/2385733573ab800b5aea09bc846b1d864f475476/data/${slug}`;
 
                 return (
