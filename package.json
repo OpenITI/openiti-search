@@ -9,9 +9,7 @@
     "lint": "next lint",
     "start": "next start",
     "index-authors": "dotenv npx tsx scripts/index-authors.ts",
-    "index-titles": "dotenv npx tsx scripts/index-titles.ts",
-    "db:push": "drizzle-kit push:mysql",
-    "db:studio": "drizzle-kit studio"
+    "index-titles": "dotenv npx tsx scripts/index-titles.ts"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.12.1",
@@ -24,7 +22,6 @@
     "@tanstack/react-table": "^8.11.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
-    "drizzle-orm": "^0.29.3",
     "lucide-react": "^0.323.0",
     "meilisearch": "^0.37.0",
     "next": "^14.0.4",
@@ -44,7 +41,6 @@
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "autoprefixer": "^10.4.14",
-    "drizzle-kit": "^0.20.14",
     "eslint": "^8.54.0",
     "eslint-config-next": "^14.0.4",
     "mysql2": "^3.9.1",
