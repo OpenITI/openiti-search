@@ -1,27 +1,28 @@
 import { client } from "@/lib/typesense";
-
-type Author = {
-  author_ar: string[];
-  author_lat: string[];
-  author_name_from_uri: string;
-  books: string[];
-  date: string; // yyyy
-  full_name: string;
-  geo: string[];
-  name_elements: string[];
-  shuhra: string;
-  uri: string; // gh uri
-  vers_uri: string;
-};
+import { chunk } from "./utils";
+import { getAuthorsData, getBooksData } from "./fetchers";
 
 const INDEX_NAME = "authors";
 
 console.log("Fetching authors data...");
-const authorsData: Record<string, Author> = await (
-  await fetch(
-    "https://raw.githubusercontent.com/OpenITI/kitab-metadata-automation/master/output/OpenITI_Github_clone_all_author_meta.json?v1",
-  )
-).json();
+const authors = await getAuthorsData();
+const authorIdToBooks = (await getBooksData()).reduce(
+  (acc, book) => {
+    const authorId = book.authorId;
+    if (!authorId) return acc;
+    delete book.authorId;
+
+    if (!acc[authorId]) acc[authorId] = [];
+
+    // @ts-ignore
+    acc[authorId].push(book);
+    return acc;
+  },
+  {} as Record<
+    string,
+    Omit<Awaited<ReturnType<typeof getBooksData>>, "authorId">
+  >,
+);
 
 try {
   console.log("Deleting authors index...");
@@ -32,6 +33,7 @@ try {
 console.log("Creating authors index...");
 await client.collections().create({
   name: INDEX_NAME,
+  enable_nested_fields: true,
   fields: [
     {
       name: "id",
@@ -61,54 +63,32 @@ await client.collections().create({
       type: "string[]",
     },
     {
-      name: "shuhra",
-      type: "string",
+      name: "books",
+      type: "object[]",
+      index: false, // don't index books
       optional: true,
     },
   ],
 });
 
-const chunk = (arr: any[], size: number) => {
-  return arr.reduce(
-    (acc, _, i) => (i % size ? acc : [...acc, arr.slice(i, i + size)]),
-    [],
-  );
-};
-
-const dedeupeNames = (names: string[]) => {
-  return Array.from(new Set(names.map((n) => n.trim())));
-};
-
-const authorsDataArray = Object.values(authorsData);
-const batches = chunk(authorsDataArray, 100);
+const batches = chunk(authors, 100) as (typeof authors)[];
 
 let i = 1;
-let total = 0;
 for (const batch of batches) {
   console.log(`Indexing batch ${i} / ${batches.length}`);
 
-  const operations = batch.map((author: Author) => {
-    const [primaryArabicName, ...otherArabicNames] = dedeupeNames(
-      author.author_ar,
+  await client
+    .collections(INDEX_NAME)
+    .documents()
+    .import(
+      batch.map((author) => {
+        return {
+          ...author,
+          books: authorIdToBooks[author.id] ?? [],
+        };
+      }),
     );
-    const [primaryLatinName, ...otherLatinNames] = dedeupeNames(
-      author.author_lat,
-    );
-
-    return {
-      id: author.uri,
-      year: Number(author.date),
-      primaryArabicName,
-      otherArabicNames,
-      primaryLatinName,
-      otherLatinNames,
-      shuhra: author.shuhra,
-    };
-  });
-
-  await client.collections(INDEX_NAME).documents().import(operations);
-  total += operations.length;
   i++;
 }
 
-console.log(`Indexed ${total} authors out of ${authorsDataArray.length}`);
+console.log(`Indexed ${authors.length} authors`);

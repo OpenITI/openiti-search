@@ -8,14 +8,14 @@ export const env = createEnv({
       .default("development"),
     TYPESENSE_API_KEY: z.string().min(1),
     TYPESENSE_URL: z.string().min(1),
+    DATABASE_URL: z.string().min(1),
   },
-  client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
-  },
+  client: {},
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     TYPESENSE_API_KEY: process.env.TYPESENSE_API_KEY,
     TYPESENSE_URL: process.env.TYPESENSE_URL,
+    DATABASE_URL: process.env.DATABASE_URL,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,

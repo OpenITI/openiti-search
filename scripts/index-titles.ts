@@ -1,22 +1,20 @@
 import { client } from "@/lib/typesense";
-
-type Book = {
-  title_ar: string[];
-  title_lat: string[];
-  genre_tags: string[];
-  versions: string[];
-  relations: string[];
-  uri: string; // gh uri authorUri.bookUri
-};
+import { chunk } from "./utils";
+import { getAuthorsData, getBooksData } from "./fetchers";
 
 const INDEX_NAME = "books";
 
 console.log("Fetching books data...");
-const booksData: Record<string, Book> = await (
-  await fetch(
-    "https://raw.githubusercontent.com/OpenITI/kitab-metadata-automation/master/output/OpenITI_Github_clone_all_book_meta.json?v1",
-  )
-).json();
+const books = await getBooksData();
+const authorIdToAuthor = (await getAuthorsData()).reduce(
+  (acc, author) => {
+    // @ts-ignore
+    acc[author.id] = author;
+
+    return acc;
+  },
+  {} as Record<string, Awaited<ReturnType<typeof getAuthorsData>>>,
+);
 
 try {
   console.log("Deleting books index...");
@@ -27,6 +25,7 @@ try {
 console.log("Creating books index...");
 await client.collections().create({
   name: INDEX_NAME,
+  enable_nested_fields: true,
   fields: [
     {
       name: "id",
@@ -38,60 +37,61 @@ await client.collections().create({
       facet: true,
     },
     {
-      name: "arabicNames",
+      name: "primaryArabicName",
+      type: "string",
+      optional: true,
+    },
+    {
+      name: "otherArabicNames",
       type: "string[]",
     },
     {
-      name: "latinNames",
+      name: "primaryLatinName",
+      type: "string",
+      optional: true,
+    },
+    {
+      name: "otherLatinNames",
       type: "string[]",
+    },
+    {
+      name: "author",
+      type: "object",
+      optional: true,
+      index: false, // don't index the author object
+    },
+    {
+      name: 'versionIds',
+      type: 'string[]', 
+    },
+    {
+      name: 'genreTags',
+      type: 'string[]', 
     },
   ],
 });
 
-const chunk = (arr: any[], size: number) => {
-  return arr.reduce(
-    (acc, _, i) => (i % size ? acc : [...acc, arr.slice(i, i + size)]),
-    [],
-  );
-};
-
-const dedeupeNames = (names: string[]) => {
-  return Array.from(new Set(names.map((n) => n.trim())));
-};
-
-const booksDataArray = Object.values(booksData);
-const batches = chunk(booksDataArray, 100);
-
-console.log(
-  `Starting indexing for ${booksDataArray.length} books in ${batches.length} batches...`,
-);
+const batches = chunk(books, 100) as (typeof books)[];
 
 let i = 1;
-let total = 0;
 for (const batch of batches) {
   console.log(`Indexing batch ${i} / ${batches.length}`);
-
-  const operations = batch
-    .filter((book: Book) => {
-      // filter out books without uri or don't have arabic or latin title
-      return (
-        book.uri && (book.title_ar.length > 0 || book.title_lat.length > 0)
-      );
-    })
-    .map((book: Book) => {
-      const author = book.uri.split(".")[0];
-
-      return {
-        id: book.uri,
-        authorId: author,
-        arabicNames: dedeupeNames(book.title_ar),
-        latinNames: dedeupeNames(book.title_lat),
-      };
-    });
-
-  await client.collections(INDEX_NAME).documents().import(operations);
-  total += operations.length;
+  await client
+    .collections(INDEX_NAME)
+    .documents()
+    .import(
+      batch.map((book) => {
+        return {
+          ...book,
+          author: book.authorId
+            ? authorIdToAuthor[book.authorId] ?? null
+            : null,
+          versionIds: book.versionIds,
+          genreTags: book.genreTags,
+        };
+      }),
+    );
   i++;
 }
 
-console.log(`Indexed ${total} books out of ${booksDataArray.length}`);
+console.log(`Indexed ${books.length} books`);

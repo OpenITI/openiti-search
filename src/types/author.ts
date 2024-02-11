@@ -1,3 +1,5 @@
+import type { BookDocument } from "./book";
+
 export type AuthorDocument = {
   id: string;
   year: number;
@@ -5,5 +7,5 @@ export type AuthorDocument = {
   otherArabicNames: string[];
   primaryLatinName: string;
   otherLatinNames: string[];
-  shuhra: string;
+  books: BookDocument[];
 };

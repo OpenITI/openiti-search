@@ -1,9 +1,17 @@
+import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
 
-import { Inter } from "next/font/google";
+import { Amiri } from "next/font/google";
+import localFont from "next/font/local";
 
-const inter = Inter({
-  subsets: ["latin"],
+const amiri = Amiri({
+  subsets: ["latin", "arabic"],
+  variable: "--font-serif",
+  weight: ["400", "700"],
+});
+
+const calSansFont = localFont({
+  src: "../fonts/CalSans-SemiBold.ttf",
   variable: "--font-sans",
 });
 
@@ -17,8 +25,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`font-sans ${inter.variable}`}>{children}</body>
+    <html
+      lang="en"
+      className={cn("font-sans", calSansFont.variable, amiri.variable)}
+    >
+      <body className="bg-gradient-to-tr from-slate-300 to-white">
+        {children}
+      </body>
     </html>
   );
 }
