@@ -14,32 +14,30 @@ export default async function AuthorsPage({ searchParams }: HomePageProps) {
   const results = await searchAuthors(q, { limit: 20, page });
 
   return (
-    <main className="flex min-h-screen w-full justify-center">
-      <div className="mt-20 w-full max-w-6xl pb-40">
-        <Header query={q} currentPage="authors" />
+    <>
+      <Header query={q} currentPage="authors" />
 
-        <div className="mt-10 w-full">
-          <SearchResults
-            response={results.results}
-            pagination={results.pagination}
-            renderResult={(result) => <AuthorItem result={result} />}
-            columns={[
-              {
-                title: "Name",
-              },
-              {
-                title: "Books",
-                className: "text-center",
-              },
-              {
-                title: "Year",
-                className: "flex-[0.5] text-center",
-              },
-            ]}
-            emptyMessage="No authors found"
-          />
-        </div>
+      <div className="mt-10 w-full">
+        <SearchResults
+          response={results.results}
+          pagination={results.pagination}
+          renderResult={(result) => <AuthorItem result={result} />}
+          columns={[
+            {
+              title: "Name",
+            },
+            {
+              title: "Books",
+              className: "text-center",
+            },
+            {
+              title: "Year",
+              className: "flex-[0.5] text-center pr-16",
+            },
+          ]}
+          emptyMessage="No authors found"
+        />
       </div>
-    </main>
+    </>
   );
 }

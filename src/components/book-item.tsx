@@ -3,6 +3,12 @@
 import type { searchBooks } from "@/lib/search";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { Button } from "./ui/button";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ArrowUpRightIcon,
+} from "@heroicons/react/24/solid";
 
 const BookItem = ({
   result,
@@ -32,123 +38,32 @@ const BookItem = ({
     .map((g) => g.split("@")[1]?.trim())
     .filter((a) => !!a);
 
-  return (
-    <div
-      className={cn(
-        "relative flex w-full cursor-pointer flex-col gap-2 bg-white p-4",
-        !open && "h-[100px] justify-center",
-      )}
-      onClick={() => setOpen(!open)}
-    >
-      {open ? (
-        <>
-          <div className="flex flex-col items-start justify-between gap-5 sm:flex-row-reverse sm:gap-0">
-            <div className="max-w-lg flex-1 text-right">
-              {primaryArabicName && (
-                <h2
-                  className="text-xl text-slate-900"
-                  dangerouslySetInnerHTML={{
-                    __html: primaryArabicName,
-                  }}
-                />
-              )}
-              <p className="text-slate-700">
-                {document.otherArabicNames.join(", ")}
-              </p>
-            </div>
+  const Wrapper = ({ children }: { children: React.ReactNode }) => {
+    const Icon = open ? ChevronUpIcon : ChevronDownIcon;
 
-            <div className="max-w-lg flex-1 text-left">
-              {primaryLatinName && (
-                <h2
-                  className="text-xl text-slate-900"
-                  dangerouslySetInnerHTML={{
-                    __html: primaryLatinName,
-                  }}
-                />
-              )}
+    return (
+      <div
+        className={cn(
+          "relative flex w-full flex-col gap-2 bg-white p-4 pr-16",
+          !open && "h-[100px] justify-center",
+        )}
+      >
+        {children}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-3 top-[50px] -translate-y-1/2"
+          onClick={() => setOpen(!open)}
+        >
+          <Icon className="h-5 w-5" />
+        </Button>
+      </div>
+    );
+  };
 
-              <p className="text-slate-700">
-                {document.otherLatinNames.join(", ")}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-10">
-            <p className="text-xl font-bold">Author:</p>
-            <div className="mt-3 flex flex-col items-start justify-between gap-5 sm:flex-row-reverse sm:gap-0">
-              <div className="max-w-lg flex-1 text-right">
-                {document.author.primaryArabicName && (
-                  <h2
-                    className="text-xl text-slate-900"
-                    dangerouslySetInnerHTML={{
-                      __html: document.author.primaryArabicName,
-                    }}
-                  />
-                )}
-                <p className="text-slate-700">
-                  {document.author.otherArabicNames.join(", ")}
-                </p>
-              </div>
-
-              <div className="max-w-lg flex-1 text-left">
-                {document.author.primaryLatinName && (
-                  <h2
-                    className="text-xl text-slate-900"
-                    dangerouslySetInnerHTML={{
-                      __html: document.author.primaryLatinName,
-                    }}
-                  />
-                )}
-
-                <p className="text-slate-700">
-                  {document.author.otherLatinNames.join(", ")}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-10">
-            <p className="text-xl font-bold">Versions:</p>
-            <div className="mt-3 grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
-              {document.versionIds.map((version) => {
-                const versionUrl = `${githubUrl}/${version}`;
-
-                return (
-                  <div key={version}>
-                    <a
-                      className="block w-fit hover:underline"
-                      href={versionUrl}
-                      target="_blank"
-                    >
-                      <p>{version}</p>
-                    </a>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="mt-10">
-            <p className="text-xl font-bold">Tags:</p>
-            <div className="mt-3 flex max-w-xl flex-wrap gap-1">
-              {tags.length ? (
-                tags.map((tag) => {
-                  return (
-                    <div
-                      key={tag}
-                      className="rounded-full bg-amber-600 px-3 py-1 text-xs text-white"
-                    >
-                      <p>{tag}</p>
-                    </div>
-                  );
-                })
-              ) : (
-                <p>None</p>
-              )}
-            </div>
-          </div>
-        </>
-      ) : (
+  if (!open) {
+    return (
+      <Wrapper>
         <div className="flex items-center justify-between">
           <div className="flex-[1.5]">
             <a
@@ -229,8 +144,118 @@ const BookItem = ({
 
           {/* <div className="flex-[0.5] text-center">{document.year} AH</div> */}
         </div>
-      )}
-    </div>
+      </Wrapper>
+    );
+  }
+
+  return (
+    <Wrapper>
+      <div className="flex flex-col items-start justify-between gap-5 sm:flex-row-reverse sm:gap-0">
+        <div className="max-w-lg flex-1 text-right">
+          {primaryArabicName && (
+            <h2
+              className="text-xl text-slate-900"
+              dangerouslySetInnerHTML={{
+                __html: primaryArabicName,
+              }}
+            />
+          )}
+          <p className="text-slate-700">
+            {document.otherArabicNames.join(", ")}
+          </p>
+        </div>
+
+        <div className="max-w-lg flex-1 text-left">
+          {primaryLatinName && (
+            <h2
+              className="text-xl text-slate-900"
+              dangerouslySetInnerHTML={{
+                __html: primaryLatinName,
+              }}
+            />
+          )}
+
+          <p className="text-slate-700">
+            {document.otherLatinNames.join(", ")}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-10">
+        <p className="text-xl font-bold">Author:</p>
+        <div className="mt-3 flex flex-col items-start justify-between gap-5 sm:flex-row-reverse sm:gap-0">
+          <div className="max-w-lg flex-1 text-right">
+            {document.author.primaryArabicName && (
+              <h2
+                className="text-xl text-slate-900"
+                dangerouslySetInnerHTML={{
+                  __html: document.author.primaryArabicName,
+                }}
+              />
+            )}
+            <p className="text-slate-700">
+              {document.author.otherArabicNames.join(", ")}
+            </p>
+          </div>
+
+          <div className="max-w-lg flex-1 text-left">
+            {document.author.primaryLatinName && (
+              <h2
+                className="text-xl text-slate-900"
+                dangerouslySetInnerHTML={{
+                  __html: document.author.primaryLatinName,
+                }}
+              />
+            )}
+
+            <p className="text-slate-700">
+              {document.author.otherLatinNames.join(", ")}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-10">
+        <p className="text-xl font-bold">Versions:</p>
+        <div className="mt-3 grid grid-cols-1 items-end gap-3 sm:grid-cols-2">
+          {document.versionIds.map((version) => {
+            const versionUrl = `${githubUrl}/${version}`;
+
+            return (
+              <div key={version}>
+                <a
+                  className="block w-fit hover:underline"
+                  href={versionUrl}
+                  target="_blank"
+                >
+                  <p>{version}</p>
+                </a>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-10">
+        <p className="text-xl font-bold">Tags:</p>
+        <div className="mt-3 flex max-w-xl flex-wrap gap-1">
+          {tags.length ? (
+            tags.map((tag) => {
+              return (
+                <div
+                  key={tag}
+                  className="rounded-full bg-amber-600 px-3 py-1 text-xs text-white"
+                >
+                  <p>{tag}</p>
+                </div>
+              );
+            })
+          ) : (
+            <p>None</p>
+          )}
+        </div>
+      </div>
+    </Wrapper>
   );
 };
 

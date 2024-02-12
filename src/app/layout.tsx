@@ -29,8 +29,10 @@ export default function RootLayout({
       lang="en"
       className={cn("font-sans", calSansFont.variable, amiri.variable)}
     >
-      <body className="bg-gradient-to-tr from-slate-300 to-white">
-        {children}
+      <body className="bg-gray-200">
+        <main className="flex min-h-screen w-full justify-center">
+          <div className="mt-36 w-full max-w-6xl pb-40">{children}</div>
+        </main>
       </body>
     </html>
   );
