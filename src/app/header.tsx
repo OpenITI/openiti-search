@@ -13,16 +13,7 @@ export default function Header({
     <div className="bg-blue-700 py-12 text-white">
       <Container>
         <div className="flex flex-col justify-between gap-10 sm:flex-row sm:items-center sm:gap-0">
-          <h1 className="text-4xl font-bold text-white">
-            Search the{" "}
-            <a
-              href="https://github.com/openiti/RELEASE"
-              target="_blank"
-              className="text-blue-100 underline"
-            >
-              OpenITI Corpus
-            </a>
-          </h1>
+          <h1 className="text-4xl font-bold">Search the OpenITI Corpus</h1>
 
           <div>
             <SearchMode currentPage={currentPage} query={query} />
