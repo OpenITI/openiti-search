@@ -2,7 +2,6 @@ import React from "react";
 import Paginator from "@/components/ui/pagination";
 import type { Pagination } from "@/types/pagination";
 import type { SearchResponse } from "typesense/lib/Typesense/Documents";
-import { cn } from "@/lib/utils";
 import SearchSort from "./search-sort";
 
 interface SearchResultsProps<T extends object & { id: string }> {
@@ -48,16 +47,6 @@ export default function SearchResults<T extends object & { id: string }>({
               <SearchSort sorts={sorts} currentSort={currentSort} />
             </div>
           </div>
-          {/* <div className="flex items-center justify-between bg-amber-800 p-4 font-sans text-white">
-            {columns.map((column) => (
-              <div
-                className={cn("flex-1", column.className)}
-                key={column.title}
-              >
-                {column.title}
-              </div>
-            ))}
-          </div> */}
 
           {response.hits!.map((result) => (
             <React.Fragment key={result.document.id}>

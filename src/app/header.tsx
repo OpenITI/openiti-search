@@ -1,6 +1,6 @@
 import SearchInput from "./search-input";
-import Link from "next/link";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Container from "@/components/ui/container";
+import SearchMode from "./_components/search-mode";
 
 export default function Header({
   query,
@@ -10,50 +10,29 @@ export default function Header({
   currentPage: "authors" | "books";
 }) {
   return (
-    <>
-      <h1 className="text-center text-4xl font-bold text-slate-900">
-        Search the{" "}
-        <a
-          href="https://github.com/openiti/RELEASE"
-          target="_blank"
-          className="text-amber-700"
-        >
-          OpenITI Corpus
-        </a>
-      </h1>
-
-      <Tabs
-        value={currentPage}
-        className="mt-10 flex w-full flex-col items-center"
-      >
-        <TabsList>
-          <TabsTrigger asChild value="authors">
-            <Link
-              href={{
-                pathname: "/",
-                ...(query ? { query: { q: query } } : {}),
-              }}
+    <div className="bg-blue-700 py-12 text-white">
+      <Container>
+        <div className="flex flex-col justify-between gap-10 sm:flex-row sm:items-center sm:gap-0">
+          <h1 className="text-4xl font-bold text-white">
+            Search the{" "}
+            <a
+              href="https://github.com/openiti/RELEASE"
+              target="_blank"
+              className="text-blue-100 underline"
             >
-              Authors
-            </Link>
-          </TabsTrigger>
+              OpenITI Corpus
+            </a>
+          </h1>
 
-          <TabsTrigger asChild value="books">
-            <Link
-              href={{
-                pathname: "/books",
-                ...(query ? { query: { q: query } } : {}),
-              }}
-            >
-              Books
-            </Link>
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+          <div>
+            <SearchMode currentPage={currentPage} query={query} />
+          </div>
+        </div>
 
-      <div className="mt-2">
-        <SearchInput defaultValue={query} />
-      </div>
-    </>
+        <div className="mt-10 sm:mt-20">
+          <SearchInput defaultValue={query} />
+        </div>
+      </Container>
+    </div>
   );
 }

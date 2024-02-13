@@ -30,9 +30,7 @@ export default function RootLayout({
       className={cn("font-sans", calSansFont.variable, amiri.variable)}
     >
       <body className="bg-gray-200">
-        <main className="flex min-h-screen w-full justify-center">
-          <div className="mt-36 w-full max-w-6xl pb-40">{children}</div>
-        </main>
+        <main className="min-h-screen w-full pb-40">{children}</main>
       </body>
     </html>
   );

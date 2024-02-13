@@ -2,6 +2,7 @@ import { searchAuthors } from "@/lib/search";
 import Header from "./header";
 import SearchResults from "../components/search-results";
 import AuthorItem from "@/components/author-item";
+import Container from "@/components/ui/container";
 
 interface HomePageProps {
   searchParams: { q: string; page: string; sort: string };
@@ -37,7 +38,7 @@ export default async function AuthorsPage({ searchParams }: HomePageProps) {
     <>
       <Header query={q} currentPage="authors" />
 
-      <div className="mt-20 w-full">
+      <Container className="mt-16">
         <SearchResults
           response={results.results}
           pagination={results.pagination}
@@ -59,7 +60,7 @@ export default async function AuthorsPage({ searchParams }: HomePageProps) {
           sorts={sorts as any}
           currentSort={sort}
         />
-      </div>
+      </Container>
     </>
   );
 }

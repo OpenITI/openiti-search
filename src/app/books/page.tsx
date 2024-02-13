@@ -2,6 +2,7 @@ import { searchBooks } from "@/lib/search";
 import Header from "../header";
 import SearchResults from "@/components/search-results";
 import BookItem from "@/components/book-item";
+import Container from "@/components/ui/container";
 
 interface HomePageProps {
   searchParams: { q: string; page: string; sort?: string };
@@ -35,7 +36,7 @@ export default async function BooksPage({ searchParams }: HomePageProps) {
     <>
       <Header query={q} currentPage="books" />
 
-      <div className="mt-20 w-full">
+      <Container className="mt-16">
         <SearchResults
           response={results.results}
           pagination={results.pagination}
@@ -62,7 +63,7 @@ export default async function BooksPage({ searchParams }: HomePageProps) {
           sorts={sorts as any}
           currentSort={sort}
         />
-      </div>
+      </Container>
     </>
   );
 }

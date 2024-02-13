@@ -85,10 +85,11 @@ export default function SearchInput({
 
   return (
     <div>
-      <div className="relative w-full">
-        <MagnifyingGlassIcon className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2" />
+      <div className="relative w-full text-black">
+        <MagnifyingGlassIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" />
+
         <input
-          className="w-full rounded-full border-2 border-slate-300 bg-white px-4 py-3 pl-10"
+          className="w-full rounded-md bg-white px-4 py-3 pl-12 shadow"
           name="query"
           type="text"
           disabled={disabled}
@@ -102,13 +103,13 @@ export default function SearchInput({
         {isPending && <Spinner className="absolute right-4 top-3.5 h-6 w-6" />}
       </div>
 
-      <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-2">
         Try:
         {(currentPage === "authors" ? authorExamples : bookExamples).map(
           (example) => (
             <button
               key={example}
-              className="text-sm font-thin text-amber-700 underline"
+              className="text-sm font-thin text-blue-200 underline"
               onClick={() => handleSearch(example)}
             >
               {example}
