@@ -16,7 +16,7 @@ export default function Header({
         <a
           href="https://github.com/openiti/RELEASE"
           target="_blank"
-          className="text-amber-600"
+          className="text-amber-700"
         >
           OpenITI Corpus
         </a>
@@ -24,7 +24,7 @@ export default function Header({
 
       <Tabs
         value={currentPage}
-        className="mt-5 flex w-full flex-col items-center"
+        className="mt-10 flex w-full flex-col items-center"
       >
         <TabsList>
           <TabsTrigger asChild value="authors">

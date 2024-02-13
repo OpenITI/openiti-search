@@ -30,6 +30,7 @@ const makePagination = (
 interface SearchOptions {
   limit?: number;
   page?: number;
+  sortBy?: string;
 }
 
 export const searchAuthors = async (q: string, options?: SearchOptions) => {
@@ -46,6 +47,7 @@ export const searchAuthors = async (q: string, options?: SearchOptions) => {
         "primaryArabicName:2, primaryLatinName:2, otherArabicNames:1, otherLatinNames:1",
       limit,
       page,
+      ...(options?.sortBy && { sort_by: options.sortBy }),
     });
 
   return {
@@ -70,6 +72,7 @@ export const searchBooks = async (q: string, options?: SearchOptions) => {
         "primaryArabicName:2, primaryLatinName:2, otherArabicNames:1, otherLatinNames:1",
       limit,
       page,
+      ...(options?.sortBy && { sort_by: options.sortBy }),
     });
 
   return {

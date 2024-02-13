@@ -4,7 +4,7 @@ import Spinner from "@/components/spinner";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  KeyboardEventHandler,
+  type KeyboardEventHandler,
   useEffect,
   useRef,
   useState,
@@ -45,6 +45,11 @@ export default function SearchInput({
       params.set("q", term);
     } else {
       params.delete("q");
+    }
+
+    // make sure to reset pagination state
+    if (params.has("page")) {
+      params.delete("page");
     }
 
     if (timeoutRef.current) {
@@ -97,22 +102,20 @@ export default function SearchInput({
         {isPending && <Spinner className="absolute right-4 top-3.5 h-6 w-6" />}
       </div>
 
-      {!value && (
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
-          Try searching for:
-          {(currentPage === "authors" ? authorExamples : bookExamples).map(
-            (example) => (
-              <button
-                key={example}
-                className="rounded-full bg-amber-700 px-3 py-1 text-sm font-thin text-white"
-                onClick={() => handleSearch(example)}
-              >
-                {example}
-              </button>
-            ),
-          )}
-        </div>
-      )}
+      <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+        Try:
+        {(currentPage === "authors" ? authorExamples : bookExamples).map(
+          (example) => (
+            <button
+              key={example}
+              className="text-sm font-thin text-amber-700 underline"
+              onClick={() => handleSearch(example)}
+            >
+              {example}
+            </button>
+          ),
+        )}
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import Paginator from "@/components/ui/pagination";
 import type { Pagination } from "@/types/pagination";
 import type { SearchResponse } from "typesense/lib/Typesense/Documents";
 import { cn } from "@/lib/utils";
+import SearchSort from "./search-sort";
 
 interface SearchResultsProps<T extends object & { id: string }> {
   response: SearchResponse<T>;
@@ -15,6 +16,11 @@ interface SearchResultsProps<T extends object & { id: string }> {
     title: string;
     className?: string;
   }[];
+  sorts: {
+    label: string;
+    value: string;
+  }[];
+  currentSort: string;
 }
 
 export default function SearchResults<T extends object & { id: string }>({
@@ -22,15 +28,27 @@ export default function SearchResults<T extends object & { id: string }>({
   pagination,
   renderResult,
   emptyMessage = "No matches found",
-  columns,
+  sorts,
+  currentSort,
 }: SearchResultsProps<T>) {
   const hasResults = response.hits?.length ?? 0 > 0;
 
   return (
     <div>
       {hasResults ? (
-        <div className="relative flex w-full flex-col divide-y divide-slate-400 overflow-hidden rounded-md font-serif">
-          <div className="flex items-center justify-between bg-amber-800 p-4 font-sans text-white">
+        <div className="relative flex w-full flex-col gap-5 font-serif">
+          <div className="flex items-center justify-between font-sans">
+            <div>
+              <p>
+                {response.found} results in {response.search_time_ms}ms
+              </p>
+            </div>
+
+            <div>
+              <SearchSort sorts={sorts} currentSort={currentSort} />
+            </div>
+          </div>
+          {/* <div className="flex items-center justify-between bg-amber-800 p-4 font-sans text-white">
             {columns.map((column) => (
               <div
                 className={cn("flex-1", column.className)}
@@ -39,7 +57,7 @@ export default function SearchResults<T extends object & { id: string }>({
                 {column.title}
               </div>
             ))}
-          </div>
+          </div> */}
 
           {response.hits!.map((result) => (
             <React.Fragment key={result.document.id}>
