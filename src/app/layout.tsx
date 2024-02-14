@@ -1,4 +1,6 @@
+import type { Viewport } from "next";
 import { cn } from "@/lib/utils";
+
 import "@/styles/globals.css";
 
 import { Amiri } from "next/font/google";
@@ -18,6 +20,14 @@ const calSansFont = localFont({
 export const metadata = {
   title: "OpenITI Search",
 };
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
+// all routes will run on the edge
+export const runtime = "edge";
 
 export default function RootLayout({
   children,

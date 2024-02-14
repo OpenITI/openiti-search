@@ -80,17 +80,3 @@ export const searchBooks = async (q: string, options?: SearchOptions) => {
     pagination: makePagination(results.found, results.page, limit),
   };
 };
-
-export const search = async (q: string) => {
-  const [
-    { results: authors, pagination: authorsPagination },
-    { results: books, pagination: booksPagination },
-  ] = await Promise.all([searchAuthors(q), searchBooks(q)]);
-
-  return {
-    authors,
-    books,
-    authorsPagination,
-    booksPagination,
-  };
-};

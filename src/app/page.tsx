@@ -1,11 +1,12 @@
 import { searchAuthors } from "@/lib/search";
-import Header from "./header";
+import Header from "./_components/header";
 import SearchResults from "../components/search-results";
 import AuthorItem from "@/components/author-item";
 import Container from "@/components/ui/container";
+import { SearchMode } from "@/types/search-mode";
 
 interface HomePageProps {
-  searchParams: { q: string; page: string; sort: string };
+  searchParams: { q?: string; page?: string; sort?: string };
 }
 
 const sorts = [
@@ -25,7 +26,6 @@ export default async function AuthorsPage({ searchParams }: HomePageProps) {
   const q = searchParams.q ?? "";
   const currentSort = searchParams.sort ?? "relevance";
   const sort = sorts.find((s) => s.value === currentSort)?.value ?? "relevance";
-
   const page = searchParams.page ? parseInt(searchParams.page) : 1;
 
   const results = await searchAuthors(q, {
@@ -36,26 +36,13 @@ export default async function AuthorsPage({ searchParams }: HomePageProps) {
 
   return (
     <>
-      <Header query={q} currentPage="authors" />
+      <Header query={q} currentMode={SearchMode.Authors} />
 
       <Container className="mt-16">
         <SearchResults
           response={results.results}
           pagination={results.pagination}
           renderResult={(result) => <AuthorItem result={result} />}
-          columns={[
-            {
-              title: "Name",
-            },
-            {
-              title: "Books",
-              className: "text-center",
-            },
-            {
-              title: "Year",
-              className: "flex-[0.5] text-center pr-16",
-            },
-          ]}
           emptyMessage="No authors found"
           sorts={sorts as any}
           currentSort={sort}

@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { useState, useTransition } from "react";
-import Spinner from "./spinner";
+import Spinner from "./ui/spinner";
 
 export default function SearchSort({
   sorts,

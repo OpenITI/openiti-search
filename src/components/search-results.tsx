@@ -11,10 +11,6 @@ interface SearchResultsProps<T extends object & { id: string }> {
   ) => JSX.Element;
   pagination?: Pagination;
   emptyMessage?: string;
-  columns: {
-    title: string;
-    className?: string;
-  }[];
   sorts: {
     label: string;
     value: string;
