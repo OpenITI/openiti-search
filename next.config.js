@@ -6,13 +6,12 @@ await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
 const config = {
-  webpack: (config) => {
-    // typesense uses axios, which is not compatible with the edge runtime
-    // so we replace it with redaxios
-    config.resolve.alias.axios = "redaxios";
-
-    return config;
-  },
+  // webpack: (config) => {
+  //   // typesense uses axios, which is not compatible with the edge runtime
+  //   // so we replace it with redaxios
+  //   config.resolve.alias.axios = "redaxios";
+  //   return config;
+  // },
 };
 
 export default config;
