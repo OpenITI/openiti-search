@@ -19,11 +19,35 @@ const calSansFont = localFont({
 
 export const metadata = {
   title: "OpenITI Search",
+  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  openGraph: {
+    type: "website",
+    siteName: "OpenITI Search",
+    locale: "en_US",
+    url: "/",
+    title: "OpenITI Search",
+  },
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#2A4DD0",
 };
 
 // all routes will run on the edge
