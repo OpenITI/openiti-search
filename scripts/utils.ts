@@ -245,6 +245,8 @@ export function removeDiacritics(str: string) {
     str = str.replace(i.letters, i.base);
   }
 
+  str = str.replace(/[ؐ-ًؕ-ٖٓ-ٟۖ-ٰٰۭ]/g, "");
+
   return str;
 }
 

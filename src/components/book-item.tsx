@@ -22,6 +22,13 @@ const BookItem = ({
     return null;
   }
 
+  const authorPrimaryArabicName = highlight.author?.primaryArabicName?.snippet
+    ? highlight.author.primaryArabicName.snippet
+    : document.author.primaryArabicName;
+  const authorPrimaryLatinName = highlight.author?.primaryLatinName?.snippet
+    ? highlight.author.primaryLatinName.snippet
+    : document.author.primaryLatinName;
+
   const authorGithubUrl = `https://github.com/OpenITI/RELEASE/tree/2385733573ab800b5aea09bc846b1d864f475476/data/${document.authorId}`;
   const githubUrl = `${authorGithubUrl}/${document.id}`;
 
@@ -71,17 +78,17 @@ const BookItem = ({
               target="_blank"
               className="flex w-fit flex-col items-center hover:underline"
             >
-              {document.author.primaryArabicName && (
+              {authorPrimaryArabicName && (
                 <h2
                   dir="rtl"
                   className="line-clamp-1 text-ellipsis text-xl text-slate-900"
                   dangerouslySetInnerHTML={{
-                    __html: document.author.primaryArabicName,
+                    __html: authorPrimaryArabicName,
                   }}
                 />
               )}
 
-              {document.author.primaryLatinName && (
+              {authorPrimaryLatinName && (
                 <h2
                   className={cn(
                     "line-clamp-1 text-ellipsis",
@@ -90,7 +97,7 @@ const BookItem = ({
                       : "text-xl text-slate-900",
                   )}
                   dangerouslySetInnerHTML={{
-                    __html: document.author.primaryLatinName,
+                    __html: authorPrimaryLatinName,
                   }}
                 />
               )}
@@ -148,11 +155,11 @@ const BookItem = ({
             <p className="text-xl font-bold">Author:</p>
             <div className="mt-3 flex flex-col items-start justify-between gap-5 sm:flex-row-reverse sm:gap-0">
               <div className="max-w-lg flex-1 text-right">
-                {document.author.primaryArabicName && (
+                {authorPrimaryArabicName && (
                   <h2
                     className="text-xl text-slate-900"
                     dangerouslySetInnerHTML={{
-                      __html: document.author.primaryArabicName,
+                      __html: authorPrimaryArabicName,
                     }}
                   />
                 )}
@@ -162,11 +169,11 @@ const BookItem = ({
               </div>
 
               <div className="max-w-lg flex-1 text-left">
-                {document.author.primaryLatinName && (
+                {authorPrimaryLatinName && (
                   <h2
                     className="text-xl text-slate-900"
                     dangerouslySetInnerHTML={{
-                      __html: document.author.primaryLatinName,
+                      __html: authorPrimaryLatinName,
                     }}
                   />
                 )}

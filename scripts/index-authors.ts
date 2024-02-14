@@ -1,6 +1,7 @@
 import { client } from "@/lib/typesense";
 import { chunk } from "./utils";
 import { getAuthorsData, getBooksData } from "./fetchers";
+import nameAliases from "./name-aliases.json";
 
 const INDEX_NAME = "authors";
 
@@ -10,7 +11,11 @@ const authorIdToBooks = (await getBooksData()).reduce(
   (acc, book) => {
     const authorId = book.authorId;
     if (!authorId) return acc;
+
+    // @ts-ignore
     delete book.authorId;
+    // @ts-ignore
+    delete book.nameVariations;
 
     if (!acc[authorId]) acc[authorId] = [];
 
@@ -63,6 +68,12 @@ await client.collections().create({
       type: "string[]",
     },
     {
+      // this is an internal field that we'll use to search for name variations
+      name: "_nameVariations",
+      type: "string[]",
+      optional: true,
+    },
+    {
       name: "books",
       type: "object[]",
       index: false, // don't index books
@@ -71,7 +82,9 @@ await client.collections().create({
   ],
 });
 
-const batches = chunk(authors, 100) as (typeof authors)[];
+const batches = chunk(authors, 200) as (typeof authors)[];
+
+// const foundVariations: object[] = [];
 
 let i = 1;
 for (const batch of batches) {
@@ -89,6 +102,32 @@ for (const batch of batches) {
       }),
     );
   i++;
+}
+console.log("\n");
+
+const aliases = Object.keys(nameAliases as Record<string, string[]>)
+  // @ts-ignore
+  .filter((a) => !!nameAliases[a] && nameAliases[a].length > 0)
+  .map((alias) => ({
+    name: alias,
+    // @ts-ignore
+    aliases: [alias, ...nameAliases[alias]] as string[],
+  }));
+
+const aliasChunks = chunk(aliases, 100) as (typeof aliases)[];
+
+let j = 1;
+for (const chunk of aliasChunks) {
+  console.log(`Indexing aliases batch ${j} / ${aliasChunks.length}`);
+  await Promise.all(
+    chunk.map((a, index) =>
+      client
+        .collections(INDEX_NAME)
+        .synonyms()
+        .upsert(`chunk-${j}:idx-${index}`, { synonyms: a.aliases }),
+    ),
+  );
+  j++;
 }
 
 console.log(`Indexed ${authors.length} authors`);

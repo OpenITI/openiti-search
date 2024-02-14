@@ -20,20 +20,19 @@ export default function SearchResultItem({
   return (
     <div
       className={cn(
-        "relative flex w-full flex-col gap-2 rounded-md bg-white p-4 pr-16",
+        "relative flex w-full flex-col gap-2 rounded-md bg-white p-4 pl-16",
         !open && "h-[100px] justify-center",
       )}
     >
-      {children}
-
       <Button
         variant="ghost"
         size="icon"
-        className="absolute right-3 top-[50px] -translate-y-1/2"
+        className="absolute left-2 top-[50px] -translate-y-1/2"
         onClick={() => setOpen(!open)}
       >
         <Icon className="h-5 w-5" />
       </Button>
+      {children}
     </div>
   );
 }

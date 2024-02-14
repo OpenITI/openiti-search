@@ -1,4 +1,6 @@
-import { dedupeStrings } from "./utils";
+import type { AuthorDocument } from "@/types/author";
+import { dedupeStrings, removeDiacritics } from "./utils";
+import type { BookDocument } from "@/types/book";
 
 type Book = {
   title_ar: string[];
@@ -23,7 +25,42 @@ type Author = {
   vers_uri: string;
 };
 
-export const getBooksData = async () => {
+const getNameVariations = (
+  author: Awaited<
+    ReturnType<typeof getAuthorsData | typeof getBooksData>
+  >[number],
+) => {
+  const currentNames = [
+    ...(author.primaryArabicName ? [author.primaryArabicName] : []),
+    ...(author.primaryLatinName ? [author.primaryLatinName] : []),
+    ...author.otherArabicNames,
+    ...author.otherLatinNames,
+  ];
+  const newVariations: string[] = [];
+
+  currentNames.forEach((name) => {
+    const nameWithoutDiactrics = removeDiacritics(name);
+
+    if (
+      nameWithoutDiactrics !== name &&
+      !currentNames.includes(nameWithoutDiactrics)
+    )
+      newVariations.push(nameWithoutDiactrics);
+
+    const nameWithoutAl = nameWithoutDiactrics.replace(/(al-)/gi, "");
+    if (
+      nameWithoutAl !== nameWithoutDiactrics &&
+      !currentNames.includes(nameWithoutAl)
+    )
+      newVariations.push(nameWithoutAl);
+  });
+
+  return newVariations;
+};
+
+export const getBooksData = async (): Promise<
+  Omit<BookDocument, "author">[]
+> => {
   const booksData: Record<string, Book> = await (
     await fetch(
       "https://raw.githubusercontent.com/OpenITI/kitab-metadata-automation/master/output/OpenITI_Github_clone_all_book_meta.json?v1",
@@ -50,7 +87,7 @@ export const getBooksData = async () => {
         book.title_lat,
       );
 
-      return {
+      const result = {
         id: book.uri,
         authorId: author,
         primaryArabicName,
@@ -60,10 +97,17 @@ export const getBooksData = async () => {
         genreTags: book.genre_tags,
         versionIds: book.versions,
       };
+
+      return {
+        ...result,
+        _nameVariations: getNameVariations(result as any),
+      } as Omit<BookDocument, "author">;
     });
 };
 
-export const getAuthorsData = async () => {
+export const getAuthorsData = async (): Promise<
+  Omit<AuthorDocument, "books">[]
+> => {
   const authorsData: Record<string, Author> = await (
     await fetch(
       "https://raw.githubusercontent.com/OpenITI/kitab-metadata-automation/master/output/OpenITI_Github_clone_all_author_meta.json?v1",
@@ -89,7 +133,7 @@ export const getAuthorsData = async () => {
 
     const [primaryLatinName, ...otherLatinNames] = dedupeStrings(latinNames);
 
-    return {
+    const result = {
       id: author.uri,
       year: Number(author.date),
       primaryArabicName,
@@ -97,5 +141,10 @@ export const getAuthorsData = async () => {
       primaryLatinName,
       otherLatinNames,
     };
+
+    return {
+      ...result,
+      _nameVariations: getNameVariations(result as any),
+    } satisfies Omit<AuthorDocument, "books">;
   });
 };

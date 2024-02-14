@@ -7,6 +7,7 @@ export type BookDocument = {
   otherArabicNames: string[];
   primaryLatinName: string;
   otherLatinNames: string[];
+  _nameVariations: string[];
   author: AuthorDocument;
   versionIds: string[];
   genreTags: string[];

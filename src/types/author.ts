@@ -3,9 +3,10 @@ import type { BookDocument } from "./book";
 export type AuthorDocument = {
   id: string;
   year: number;
-  primaryArabicName: string;
+  primaryArabicName?: string;
   otherArabicNames: string[];
-  primaryLatinName: string;
+  primaryLatinName?: string;
   otherLatinNames: string[];
+  _nameVariations: string[];
   books: BookDocument[];
 };

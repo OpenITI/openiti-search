@@ -18,7 +18,12 @@ const authorExamples = [
   "Ibn al-Jawzi",
 ];
 
-const bookExamples = ["Sahih al-Bukhari"];
+const bookExamples = [
+  "Riyad al-Salihin",
+  "Fath al-Bari",
+  "Da Wa Dawa",
+  "Usul Sunna",
+];
 
 const DEBOUNCE_DELAY = 300;
 

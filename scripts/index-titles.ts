@@ -55,23 +55,26 @@ await client.collections().create({
       type: "string[]",
     },
     {
+      name: "_nameVariations",
+      type: "string[]",
+    },
+    {
       name: "author",
       type: "object",
       optional: true,
-      index: false, // don't index the author object
     },
     {
-      name: 'versionIds',
-      type: 'string[]', 
+      name: "versionIds",
+      type: "string[]",
     },
     {
-      name: 'genreTags',
-      type: 'string[]', 
+      name: "genreTags",
+      type: "string[]",
     },
   ],
 });
 
-const batches = chunk(books, 100) as (typeof books)[];
+const batches = chunk(books, 200) as (typeof books)[];
 
 let i = 1;
 for (const batch of batches) {

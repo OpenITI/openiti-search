@@ -31,7 +31,7 @@ export default function SearchResults<T extends object & { id: string }>({
   return (
     <div>
       {hasResults ? (
-        <div className="relative flex w-full flex-col gap-5 font-serif">
+        <div className="relative w-full font-serif">
           <div className="flex items-center justify-between font-sans">
             <div>
               <p>
@@ -44,11 +44,13 @@ export default function SearchResults<T extends object & { id: string }>({
             </div>
           </div>
 
-          {response.hits!.map((result) => (
-            <React.Fragment key={result.document.id}>
-              {renderResult(result)}
-            </React.Fragment>
-          ))}
+          <div className="mt-5 flex flex-col gap-4">
+            {response.hits!.map((result) => (
+              <React.Fragment key={result.document.id}>
+                {renderResult(result)}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
       ) : (
         <p>{emptyMessage}</p>
