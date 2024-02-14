@@ -89,7 +89,7 @@ export default function SearchInput({
         <MagnifyingGlassIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" />
 
         <input
-          className="w-full rounded-md bg-white px-4 py-3 pl-12 shadow"
+          className="focus:ring-offset-primary w-full rounded-md bg-white px-4 py-3 pl-12 shadow outline-none transition-all duration-200 ease-in-out focus:ring-2 focus:ring-white focus:ring-offset-[3px]"
           name="query"
           type="text"
           disabled={disabled}
