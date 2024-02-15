@@ -5,105 +5,110 @@ import nameAliases from "./name-aliases.json";
 
 const INDEX_NAME = "authors";
 
-console.log("Fetching authors data...");
-const authors = await getAuthorsData();
-const authorIdToBooks = (await getBooksData()).reduce(
-  (acc, book) => {
-    const authorId = book.authorId;
-    if (!authorId) return acc;
+const aliasOnly = process.argv.includes("alias-only");
 
-    // @ts-ignore
-    delete book.authorId;
-    // @ts-ignore
-    delete book.nameVariations;
+if (!aliasOnly) {
+  console.log("Fetching authors data...");
+  const authors = await getAuthorsData();
+  const authorIdToBooks = (await getBooksData()).reduce(
+    (acc, book) => {
+      const authorId = book.authorId;
+      if (!authorId) return acc;
 
-    if (!acc[authorId]) acc[authorId] = [];
+      // @ts-ignore
+      delete book.authorId;
+      // @ts-ignore
+      delete book.nameVariations;
 
-    // @ts-ignore
-    acc[authorId].push(book);
-    return acc;
-  },
-  {} as Record<
-    string,
-    Omit<Awaited<ReturnType<typeof getBooksData>>, "authorId">
-  >,
-);
+      if (!acc[authorId]) acc[authorId] = [];
 
-try {
-  console.log("Deleting authors index...");
-  // delete the index if it already exists
-  await client.collections(INDEX_NAME).delete();
-} catch (e) {}
-
-console.log("Creating authors index...");
-await client.collections().create({
-  name: INDEX_NAME,
-  enable_nested_fields: true,
-  fields: [
-    {
-      name: "id",
-      type: "string",
+      // @ts-ignore
+      acc[authorId].push(book);
+      return acc;
     },
-    {
-      name: "year",
-      type: "int32",
-      facet: true,
-    },
-    {
-      name: "primaryArabicName",
-      type: "string",
-      optional: true,
-    },
-    {
-      name: "otherArabicNames",
-      type: "string[]",
-    },
-    {
-      name: "primaryLatinName",
-      type: "string",
-      optional: true,
-    },
-    {
-      name: "otherLatinNames",
-      type: "string[]",
-    },
-    {
-      // this is an internal field that we'll use to search for name variations
-      name: "_nameVariations",
-      type: "string[]",
-      optional: true,
-    },
-    {
-      name: "books",
-      type: "object[]",
-      index: false, // don't index books
-      optional: true,
-    },
-  ],
-});
+    {} as Record<
+      string,
+      Omit<Awaited<ReturnType<typeof getBooksData>>, "authorId">
+    >,
+  );
 
-const batches = chunk(authors, 200) as (typeof authors)[];
+  try {
+    console.log("Deleting authors index...");
+    // delete the index if it already exists
+    await client.collections(INDEX_NAME).delete();
+  } catch (e) {}
 
-// const foundVariations: object[] = [];
+  console.log("Creating authors index...");
+  await client.collections().create({
+    name: INDEX_NAME,
+    enable_nested_fields: true,
+    fields: [
+      {
+        name: "id",
+        type: "string",
+      },
+      {
+        name: "year",
+        type: "int32",
+        facet: true,
+      },
+      {
+        name: "primaryArabicName",
+        type: "string",
+        optional: true,
+      },
+      {
+        name: "otherArabicNames",
+        type: "string[]",
+      },
+      {
+        name: "primaryLatinName",
+        type: "string",
+        optional: true,
+      },
+      {
+        name: "otherLatinNames",
+        type: "string[]",
+      },
+      {
+        // this is an internal field that we'll use to search for name variations
+        name: "_nameVariations",
+        type: "string[]",
+        optional: true,
+      },
+      {
+        name: "books",
+        type: "object[]",
+        index: false, // don't index books
+        optional: true,
+      },
+    ],
+  });
 
-let i = 1;
-for (const batch of batches) {
-  console.log(`Indexing batch ${i} / ${batches.length}`);
+  const batches = chunk(authors, 200) as (typeof authors)[];
 
-  await client
-    .collections(INDEX_NAME)
-    .documents()
-    .import(
-      batch.map((author) => {
-        return {
-          ...author,
-          books: authorIdToBooks[author.id] ?? [],
-        };
-      }),
-    );
-  i++;
+  // const foundVariations: object[] = [];
+
+  let i = 1;
+  for (const batch of batches) {
+    console.log(`Indexing batch ${i} / ${batches.length}`);
+
+    await client
+      .collections(INDEX_NAME)
+      .documents()
+      .import(
+        batch.map((author) => {
+          return {
+            ...author,
+            books: authorIdToBooks[author.id] ?? [],
+          };
+        }),
+      );
+    i++;
+  }
+  console.log(`Indexed ${authors.length} authors`);
+  console.log("\n");
 }
-console.log("\n");
 
 const aliases = Object.keys(nameAliases as Record<string, string[]>)
   // @ts-ignore
@@ -114,7 +119,7 @@ const aliases = Object.keys(nameAliases as Record<string, string[]>)
     aliases: [alias, ...nameAliases[alias]] as string[],
   }));
 
-const aliasChunks = chunk(aliases, 100) as (typeof aliases)[];
+const aliasChunks = chunk(aliases, 50) as (typeof aliases)[];
 
 let j = 1;
 for (const chunk of aliasChunks) {
@@ -130,4 +135,4 @@ for (const chunk of aliasChunks) {
   j++;
 }
 
-console.log(`Indexed ${authors.length} authors`);
+console.log(`Indexed ${aliases.length} aliases`);
