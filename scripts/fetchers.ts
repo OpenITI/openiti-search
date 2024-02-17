@@ -140,6 +140,7 @@ export const getAuthorsData = async (): Promise<
       otherArabicNames,
       primaryLatinName,
       otherLatinNames,
+      geographies: author.geo,
     };
 
     return {

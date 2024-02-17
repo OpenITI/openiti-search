@@ -8,5 +8,6 @@ export type AuthorDocument = {
   primaryLatinName?: string;
   otherLatinNames: string[];
   _nameVariations: string[];
+  geographies: string[];
   books: BookDocument[];
 };

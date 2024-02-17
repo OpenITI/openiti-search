@@ -1,6 +1,7 @@
 "use client";
 
 import Spinner from "@/components/ui/spinner";
+import { getQueryUrlParams } from "@/lib/url";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -39,23 +40,12 @@ export default function SearchInput({
   const [isPending, startTransition] = useTransition();
   const timeoutRef = useRef<NodeJS.Timeout>(null);
   const [value, setValue] = useState(defaultValue);
-  const currentPage = pathname === "/books" ? "books" : "authors";
+  const currentPage = pathname === "/authors" ? "authors" : "books";
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleSearch(term: string) {
     setValue(term);
-    const params = new URLSearchParams(window.location.search);
-
-    if (term) {
-      params.set("q", term);
-    } else {
-      params.delete("q");
-    }
-
-    // make sure to reset pagination state
-    if (params.has("page")) {
-      params.delete("page");
-    }
+    const params = getQueryUrlParams(term);
 
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -74,8 +64,6 @@ export default function SearchInput({
   useEffect(() => {
     // listen for / char and focus input
     const handler: KeyboardEventHandler = (e) => {
-      console.log(e);
-
       if (e.key === "/") {
         inputRef.current?.focus();
       }
@@ -94,7 +82,7 @@ export default function SearchInput({
         <MagnifyingGlassIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" />
 
         <input
-          className="focus:ring-offset-primary w-full rounded-md bg-white px-4 py-3 pl-12 shadow outline-none transition-all duration-200 ease-in-out focus:ring-2 focus:ring-white focus:ring-offset-[3px]"
+          className="w-full rounded-md bg-white px-4 py-3 pl-12 shadow outline-none transition-all duration-200 ease-in-out focus:ring-2 focus:ring-white focus:ring-offset-[3px] focus:ring-offset-primary"
           name="query"
           type="text"
           disabled={disabled}

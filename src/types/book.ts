@@ -8,7 +8,7 @@ export type BookDocument = {
   primaryLatinName: string;
   otherLatinNames: string[];
   _nameVariations: string[];
-  author: AuthorDocument;
+  author: Omit<AuthorDocument, "books" | "geographies">;
   versionIds: string[];
   genreTags: string[];
 };

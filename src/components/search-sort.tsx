@@ -39,7 +39,7 @@ export default function SearchSort({
     }
 
     startTransition(() => {
-      replace(`${pathname}?${params.toString()}`);
+      replace(`${pathname}?${params.toString()}`, { scroll: false });
     });
   }
 

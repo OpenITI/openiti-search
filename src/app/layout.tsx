@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 import "@/styles/globals.css";
 
-import { Amiri } from "next/font/google";
+import { Amiri, Inter } from "next/font/google";
 import localFont from "next/font/local";
 
 const amiri = Amiri({
@@ -15,6 +15,11 @@ const amiri = Amiri({
 const calSansFont = localFont({
   src: "../fonts/CalSans-SemiBold.ttf",
   variable: "--font-sans",
+});
+
+const interFont = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 export const metadata = {
@@ -61,7 +66,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("font-sans", calSansFont.variable, amiri.variable)}
+      className={cn(
+        "font-sans",
+        calSansFont.variable,
+        amiri.variable,
+        interFont.variable,
+      )}
     >
       <body className="bg-gray-200">
         <main className="min-h-screen w-full pb-40">{children}</main>

@@ -6,17 +6,17 @@ import Link from "next/link";
 
 const modes = [
   {
-    label: "Authors",
-    value: SearchMode.Authors,
-  },
-  {
     label: "Books",
     value: SearchMode.Books,
+  },
+  {
+    label: "Authors",
+    value: SearchMode.Authors,
   },
 ];
 
 const makeModeHref = (mode: SearchMode, query?: string) => ({
-  pathname: mode === SearchMode.Authors ? "/" : "/books",
+  pathname: mode === SearchMode.Authors ? "/authors" : "/",
   ...(query ? { query: { q: query } } : {}),
 });
 
@@ -28,7 +28,7 @@ export default function Header({
   currentMode: SearchMode;
 }) {
   return (
-    <div className="bg-blue-700 pb-12 pt-16 text-white">
+    <div className="bg-blue-700 pb-12 pt-12 text-white sm:pt-16">
       <Container>
         <div className="flex flex-col justify-between gap-10 sm:flex-row sm:items-center sm:gap-0">
           <h1 className="text-4xl font-bold">Search the OpenITI Corpus</h1>
