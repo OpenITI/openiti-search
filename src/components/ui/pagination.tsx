@@ -117,6 +117,8 @@ const Paginator = ({
   totalPages: number;
   currentPage: number;
 }) => {
+  const params = useSearchParams();
+
   const hasPrevious = currentPage > 1;
   const hasNext = currentPage < totalPages;
 
@@ -142,9 +144,8 @@ const Paginator = ({
   }, [currentPage, totalPages]);
 
   const makePageLink = (page: number) => {
-    const searchParams = new URLSearchParams(window.location.search);
+    const searchParams = new URLSearchParams(params);
     searchParams.set("page", page.toString());
-
     return `?${searchParams.toString()}`;
   };
 

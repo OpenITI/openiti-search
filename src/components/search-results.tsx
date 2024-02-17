@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import Paginator from "@/components/ui/pagination";
 import type { Pagination } from "@/types/pagination";
 import type { SearchResponse } from "typesense/lib/Typesense/Documents";
@@ -96,10 +96,12 @@ export default function SearchResults<T extends object & { id: string }>({
 
         {pagination && (
           <div className="mt-10">
-            <Paginator
-              totalPages={pagination.totalPages}
-              currentPage={pagination.currentPage}
-            />
+            <Suspense>
+              <Paginator
+                totalPages={pagination.totalPages}
+                currentPage={pagination.currentPage}
+              />
+            </Suspense>
           </div>
         )}
       </div>
