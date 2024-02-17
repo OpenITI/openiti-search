@@ -145,7 +145,7 @@ export default function AuthorsFilter({
       </h3>
 
       <Input
-        placeholder="Search for a genre"
+        placeholder="Search for an author"
         className="font-inter mt-3"
         value={value}
         onChange={handleInputChange}
