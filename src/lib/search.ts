@@ -4,6 +4,7 @@ import { client } from "./typesense";
 import type { AuthorDocument } from "@/types/author";
 import type { BookDocument } from "@/types/book";
 import type { Pagination } from "@/types/pagination";
+import { unstable_cache } from "next/cache";
 
 const AUTHORS_INDEX = "authors";
 const TITLES_INDEX = "books";
@@ -27,6 +28,18 @@ const makePagination = (
   };
 };
 
+async function hashObject(obj: object) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(JSON.stringify(obj));
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hash));
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  return hashHex;
+}
+
 interface SearchOptions {
   limit?: number;
   page?: number;
@@ -46,44 +59,53 @@ const authorsQueryByWeights = Object.keys(authorsQueryWeights)
   .join(", ");
 
 export const searchAuthors = async (q: string, options?: SearchOptions) => {
-  const { limit = DEFAULT_AUTHORS_PER_PAGE, page = 1 } = options ?? {};
+  const fn = unstable_cache(
+    async (q: string, options?: SearchOptions) => {
+      const { limit = DEFAULT_AUTHORS_PER_PAGE, page = 1 } = options ?? {};
 
-  const yearRange = (options?.filters?.yearRange ?? null) as number[] | null;
-  const geographies = (options?.filters?.geographies ?? null) as
-    | string[]
-    | null;
-  const ids = (options?.filters?.ids ?? null) as string[] | null;
+      const yearRange = (options?.filters?.yearRange ?? null) as
+        | number[]
+        | null;
+      const geographies = (options?.filters?.geographies ?? null) as
+        | string[]
+        | null;
+      const ids = (options?.filters?.ids ?? null) as string[] | null;
 
-  const filters: string[] = [];
-  if (yearRange) filters.push(`year:[${yearRange[0]}..${yearRange[1]}]`);
-  if (geographies) {
-    geographies.forEach((geo) => {
-      filters.push(`geographies:=${geo}`);
-    });
-  }
+      const filters: string[] = [];
+      if (yearRange) filters.push(`year:[${yearRange[0]}..${yearRange[1]}]`);
+      if (geographies) {
+        geographies.forEach((geo) => {
+          filters.push(`geographies:=${geo}`);
+        });
+      }
 
-  if (ids) {
-    filters.push(`id:[${ids.map((id) => `\`${id}\``).join(", ")}]`);
-  }
+      if (ids) {
+        filters.push(`id:[${ids.map((id) => `\`${id}\``).join(", ")}]`);
+      }
 
-  const results = await client
-    .collections<AuthorDocument>(AUTHORS_INDEX)
-    .documents()
-    .search({
-      q: prepareQuery(q),
-      query_by: authorsQueryBy,
-      query_by_weights: authorsQueryByWeights,
-      prioritize_token_position: true,
-      limit,
-      page,
-      ...(options?.sortBy && { sort_by: options.sortBy }),
-      ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
-    });
+      const results = await client
+        .collections<AuthorDocument>(AUTHORS_INDEX)
+        .documents()
+        .search({
+          q: prepareQuery(q),
+          query_by: authorsQueryBy,
+          query_by_weights: authorsQueryByWeights,
+          prioritize_token_position: true,
+          limit,
+          page,
+          ...(options?.sortBy && { sort_by: options.sortBy }),
+          ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
+        });
 
-  return {
-    results,
-    pagination: makePagination(results!.found, results!.page, limit),
-  };
+      return {
+        results,
+        pagination: makePagination(results!.found, results!.page, limit),
+      };
+    },
+    [await hashObject({ q, options: options ?? {} })],
+  );
+
+  return fn(q, options);
 };
 
 const booksQueryWeights = {
@@ -105,73 +127,86 @@ const booksQueryByWeights = Object.keys(booksQueryWeights)
   .join(", ");
 
 export const searchBooks = async (q: string, options?: SearchOptions) => {
-  const { limit = DEFAULT_BOOKS_PER_PAGE, page = 1 } = options ?? {};
+  const fn = unstable_cache(
+    async (q: string, options?: SearchOptions) => {
+      const { limit = DEFAULT_BOOKS_PER_PAGE, page = 1 } = options ?? {};
 
-  const genres = (options?.filters?.genres ?? null) as string[] | null;
-  const authors = (options?.filters?.authors ?? null) as string[] | null;
+      const genres = (options?.filters?.genres ?? null) as string[] | null;
+      const authors = (options?.filters?.authors ?? null) as string[] | null;
 
-  const filters: string[] = [];
-  if (genres && genres.length > 0) {
-    genres.forEach((genre) => {
-      filters.push(`genreTags:=${genre}`);
-    });
-  }
+      const filters: string[] = [];
+      if (genres && genres.length > 0) {
+        genres.forEach((genre) => {
+          filters.push(`genreTags:=${genre}`);
+        });
+      }
 
-  if (authors && authors.length > 0) {
-    filters.push(`authorId:[${authors.map((id) => `\`${id}\``).join(", ")}]`);
-  }
+      if (authors && authors.length > 0) {
+        filters.push(
+          `authorId:[${authors.map((id) => `\`${id}\``).join(", ")}]`,
+        );
+      }
 
-  // const results = await client
-  //   .collections<BookDocument>(TITLES_INDEX)
-  //   .documents()
-  //   .search({
-  //     q: prepareQuery(q),
-  //     query_by: booksQueryBy,
-  //     query_by_weights: booksQueryByWeights,
-  //     prioritize_token_position: true,
-  //     limit,
-  //     page,
-  //     ...(options?.sortBy && { sort_by: options.sortBy }),
-  //     ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
-  //   });
+      // const results = await client
+      //   .collections<BookDocument>(TITLES_INDEX)
+      //   .documents()
+      //   .search({
+      //     q: prepareQuery(q),
+      //     query_by: booksQueryBy,
+      //     query_by_weights: booksQueryByWeights,
+      //     prioritize_token_position: true,
+      //     limit,
+      //     page,
+      //     ...(options?.sortBy && { sort_by: options.sortBy }),
+      //     ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
+      //   });
 
-  const results = await client.multiSearch.perform<
-    [BookDocument, AuthorDocument]
-  >({
-    searches: [
-      {
-        collection: TITLES_INDEX,
-        q: prepareQuery(q),
-        query_by: booksQueryBy,
-        query_by_weights: booksQueryByWeights,
-        prioritize_token_position: true,
-        limit,
-        page,
-        ...(options?.sortBy && { sort_by: options.sortBy }),
-        ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
-      },
-      ...(authors && authors.length > 0
-        ? [
-            {
-              collection: AUTHORS_INDEX,
-              q: "",
-              query_by: "primaryArabicName",
-              limit: 100,
-              page: 1,
-              filter_by: `id:[${authors.map((id) => `\`${id}\``).join(", ")}]`,
-            },
-          ]
-        : []),
-    ],
-  });
+      const results = await client.multiSearch.perform<
+        [BookDocument, AuthorDocument]
+      >({
+        searches: [
+          {
+            collection: TITLES_INDEX,
+            q: prepareQuery(q),
+            query_by: booksQueryBy,
+            query_by_weights: booksQueryByWeights,
+            prioritize_token_position: true,
+            limit,
+            page,
+            ...(options?.sortBy && { sort_by: options.sortBy }),
+            ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
+          },
+          ...(authors && authors.length > 0
+            ? [
+                {
+                  collection: AUTHORS_INDEX,
+                  q: "",
+                  query_by: "primaryArabicName",
+                  limit: 100,
+                  page: 1,
+                  filter_by: `id:[${authors.map((id) => `\`${id}\``).join(", ")}]`,
+                },
+              ]
+            : []),
+        ],
+      });
 
-  const [booksResults, selectedAuthorsResults] = results.results;
+      const [booksResults, selectedAuthorsResults] = results.results;
 
-  return {
-    results: booksResults,
-    pagination: makePagination(booksResults.found, booksResults.page, limit),
-    selectedAuthors: selectedAuthorsResults ?? null,
-  };
+      return {
+        results: booksResults,
+        pagination: makePagination(
+          booksResults.found,
+          booksResults.page,
+          limit,
+        ),
+        selectedAuthors: selectedAuthorsResults ?? null,
+      };
+    },
+    [await hashObject({ q, options: options ?? {} })],
+  );
+
+  return fn(q, options);
 };
 
 const prepareQuery = (q: string) => {
