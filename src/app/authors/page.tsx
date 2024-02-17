@@ -21,7 +21,7 @@ const getSortString = (sort: (typeof authorSorts)[number]["value"]) => {
   if (sort === "year-desc") return "year:desc";
 };
 
-export const revalidate = Infinity; // cache indefinitely
+export const revalidate = false; // cache indefinitely
 export const dynamicParams = true;
 
 export async function generateStaticParams() {

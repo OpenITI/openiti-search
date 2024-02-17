@@ -17,7 +17,7 @@ const getSortString = (sort: (typeof bookSorts)[number]["value"]) => {
 
 type BooksPageProps = InferPagePropsType<RouteType>;
 
-export const revalidate = Infinity; // cache indefinitely
+export const revalidate = false; // cache indefinitely
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
