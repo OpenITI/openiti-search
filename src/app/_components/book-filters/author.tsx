@@ -163,11 +163,13 @@ export default function AuthorsFilter({
                 id={authorId}
                 checked={selectedAuthors.includes(authorId)}
                 onCheckedChange={() => handleChange(authorId)}
+                className="h-4 w-4"
               />
 
               <label
                 htmlFor={authorId}
-                className="min-w-0 max-w-[70%] break-words"
+                className="line-clamp-1 min-w-0 max-w-[70%] break-words text-sm"
+                title={author.primaryLatinName ?? author.primaryArabicName}
               >
                 {author.primaryLatinName ?? author.primaryArabicName}
               </label>

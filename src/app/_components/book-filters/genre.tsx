@@ -106,11 +106,13 @@ export default function GenresFilter({ currentGenres }: GenresFilterProps) {
                 id={genre}
                 checked={selectedGenres.includes(genre)}
                 onCheckedChange={() => handleChange(genre)}
+                className="h-4 w-4"
               />
 
               <label
                 htmlFor={genre}
-                className="min-w-0 max-w-[70%] break-words"
+                className="line-clamp-1 min-w-0 max-w-[70%] break-words text-sm"
+                title={genre}
               >
                 {genre}
               </label>
