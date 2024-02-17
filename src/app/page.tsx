@@ -17,6 +17,13 @@ const getSortString = (sort: (typeof bookSorts)[number]["value"]) => {
 
 type BooksPageProps = InferPagePropsType<RouteType>;
 
+export const revalidate = false; // cache indefinitely
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  return [{}];
+}
+
 async function BooksPage({ searchParams }: BooksPageProps) {
   const { q, sort, page, genres, authors } = searchParams;
 
