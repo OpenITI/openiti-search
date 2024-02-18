@@ -55,9 +55,6 @@ export const viewport: Viewport = {
   themeColor: "#2A4DD0",
 };
 
-// all routes will run on the edge
-// export const runtime = "edge";
-
 export default function RootLayout({
   children,
 }: {

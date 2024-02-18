@@ -18,6 +18,7 @@ const getSortString = (sort: (typeof bookSorts)[number]["value"]) => {
 type BooksPageProps = InferPagePropsType<RouteType>;
 
 export const dynamic = "force-dynamic";
+export const runtime = "edge";
 
 async function BooksPage({ searchParams }: BooksPageProps) {
   const { q, sort, page, genres, authors } = searchParams;
