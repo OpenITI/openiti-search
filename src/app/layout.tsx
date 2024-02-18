@@ -56,7 +56,7 @@ export const viewport: Viewport = {
 };
 
 // all routes will run on the edge
-// export const runtime = "edge";
+export const runtime = "edge";
 
 export default function RootLayout({
   children,

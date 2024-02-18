@@ -1,9 +1,10 @@
 "use server";
 
-import { client } from "./typesense";
 import type { AuthorDocument } from "@/types/author";
 import type { BookDocument } from "@/types/book";
 import type { Pagination } from "@/types/pagination";
+import { makeMultiSearchRequest, makeSearchRequest } from "./typesense-edge";
+import type { SearchResponse } from "typesense/lib/Typesense/Documents";
 
 const AUTHORS_INDEX = "authors";
 const TITLES_INDEX = "books";
@@ -66,23 +67,20 @@ export const searchAuthors = async (q: string, options?: SearchOptions) => {
     filters.push(`id:[${ids.map((id) => `\`${id}\``).join(", ")}]`);
   }
 
-  const results = await client
-    .collections<AuthorDocument>(AUTHORS_INDEX)
-    .documents()
-    .search({
-      q: prepareQuery(q),
-      query_by: authorsQueryBy,
-      query_by_weights: authorsQueryByWeights,
-      prioritize_token_position: true,
-      limit,
-      page,
-      ...(options?.sortBy && { sort_by: options.sortBy }),
-      ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
-    });
+  const results = (await makeSearchRequest(AUTHORS_INDEX, {
+    q: prepareQuery(q),
+    query_by: authorsQueryBy,
+    query_by_weights: authorsQueryByWeights,
+    prioritize_token_position: true,
+    limit,
+    page,
+    ...(options?.sortBy && { sort_by: options.sortBy }),
+    ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
+  })) as SearchResponse<AuthorDocument>;
 
   return {
     results,
-    pagination: makePagination(results!.found, results!.page, limit),
+    pagination: makePagination(results.found, results.page, limit),
   };
 };
 
@@ -135,35 +133,33 @@ export const searchBooks = async (q: string, options?: SearchOptions) => {
   //     ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
   //   });
 
-  const results = await client.multiSearch.perform<
-    [BookDocument, AuthorDocument]
-  >({
-    searches: [
-      {
-        collection: TITLES_INDEX,
-        q: prepareQuery(q),
-        query_by: booksQueryBy,
-        query_by_weights: booksQueryByWeights,
-        prioritize_token_position: true,
-        limit,
-        page,
-        ...(options?.sortBy && { sort_by: options.sortBy }),
-        ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
-      },
-      ...(authors && authors.length > 0
-        ? [
-            {
-              collection: AUTHORS_INDEX,
-              q: "",
-              query_by: "primaryArabicName",
-              limit: 100,
-              page: 1,
-              filter_by: `id:[${authors.map((id) => `\`${id}\``).join(", ")}]`,
-            },
-          ]
-        : []),
-    ],
-  });
+  const results = (await makeMultiSearchRequest([
+    {
+      collection: TITLES_INDEX,
+      q: prepareQuery(q),
+      query_by: booksQueryBy,
+      query_by_weights: booksQueryByWeights,
+      prioritize_token_position: true,
+      limit,
+      page,
+      ...(options?.sortBy && { sort_by: options.sortBy }),
+      ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
+    },
+    ...(authors && authors.length > 0
+      ? [
+          {
+            collection: AUTHORS_INDEX,
+            q: "",
+            query_by: "primaryArabicName",
+            limit: 100,
+            page: 1,
+            filter_by: `id:[${authors.map((id) => `\`${id}\``).join(", ")}]`,
+          },
+        ]
+      : []),
+  ])) as {
+    results: [SearchResponse<BookDocument>, SearchResponse<AuthorDocument>];
+  };
 
   const [booksResults, selectedAuthorsResults] = results.results;
 
