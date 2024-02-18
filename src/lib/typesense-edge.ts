@@ -28,6 +28,7 @@ export const makeMultiSearchRequest = async (
 
   const res = await fetch(url, {
     method: "POST",
+    cache: "no-store",
     headers: {
       "X-TYPESENSE-API-KEY": env.TYPESENSE_API_KEY,
       "Content-Type": "application/json",
