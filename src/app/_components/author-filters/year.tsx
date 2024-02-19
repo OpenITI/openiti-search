@@ -73,12 +73,14 @@ export default function YearFilter({ defaultRange, maxYear }: YearFilterProps) {
 
     // If the format is AD (Gregorian), we need to convert the year to Hijri
     const newValueInHijri = (
-      format === "AH" ? newValue : newValue.map(gregorianYearToHijriYear)
+      format === "AH"
+        ? newValue
+        : newValue.map((y) => gregorianYearToHijriYear(y) + 1)
     ) as [number, number];
 
     const params = getYearFilterUrlParams(
-      newValueInHijri[0] + 1,
-      newValueInHijri[1] + 1,
+      newValueInHijri[0],
+      newValueInHijri[1],
     );
 
     if (timeoutRef.current) {
