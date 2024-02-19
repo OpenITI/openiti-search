@@ -133,56 +133,48 @@ export const searchBooks = async (q: string, options?: SearchOptions) => {
   //     ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
   //   });
 
-  const results = (await makeMultiSearchRequest([
-    {
-      collection: TITLES_INDEX,
-      q: prepareQuery(q),
-      query_by: booksQueryBy,
-      query_by_weights: booksQueryByWeights,
-      prioritize_token_position: true,
-      limit,
-      page,
-      ...(options?.sortBy && { sort_by: options.sortBy }),
-      ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
-    },
-    {
-      collection: AUTHORS_INDEX,
-      q: "",
-      query_by: "primaryArabicName",
+  const [initialAuthors, results] = await Promise.all([
+    searchAuthors("", {
       limit: 10,
       page: 1,
-      sort_by: "booksCount:desc,_text_match:desc",
-    },
-    ...(authors && authors.length > 0
-      ? [
-          {
-            collection: AUTHORS_INDEX,
-            q: "",
-            query_by: "primaryArabicName",
-            limit: 100,
-            page: 1,
-            filter_by: `id:[${authors.map((id) => `\`${id}\``).join(", ")}]`,
-          },
-        ]
-      : []),
-  ])) as {
-    results: [
-      SearchResponse<BookDocument>,
-      SearchResponse<AuthorDocument>,
-      SearchResponse<AuthorDocument>,
-    ];
-  };
+      sortBy: "booksCount:desc,_text_match:desc",
+    }),
+    makeMultiSearchRequest([
+      {
+        collection: TITLES_INDEX,
+        q: prepareQuery(q),
+        query_by: booksQueryBy,
+        query_by_weights: booksQueryByWeights,
+        prioritize_token_position: true,
+        limit,
+        page,
+        ...(options?.sortBy && { sort_by: options.sortBy }),
+        ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
+      },
 
-  const [booksResults, initialAuthors, selectedAuthorsResults] =
-    results.results;
+      ...(authors && authors.length > 0
+        ? [
+            {
+              collection: AUTHORS_INDEX,
+              q: "",
+              query_by: "primaryArabicName",
+              limit: 100,
+              page: 1,
+              filter_by: `id:[${authors.map((id) => `\`${id}\``).join(", ")}]`,
+            },
+          ]
+        : []),
+    ]) as Promise<{
+      results: [SearchResponse<BookDocument>, SearchResponse<AuthorDocument>];
+    }>,
+  ]);
+
+  const [booksResults, selectedAuthorsResults] = results.results;
 
   return {
     results: booksResults,
     pagination: makePagination(booksResults.found, booksResults.page, limit),
-    initialAuthors: {
-      results: initialAuthors,
-      pagination: makePagination(initialAuthors.found, initialAuthors.page, 10),
-    },
+    initialAuthors,
     selectedAuthors: selectedAuthorsResults ?? null,
   };
 };
