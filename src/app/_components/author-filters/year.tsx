@@ -125,11 +125,14 @@ export default function YearFilter({ defaultRange, maxYear }: YearFilterProps) {
   const handleYearFormatChange = (newFormat: YearFormat) => {
     setFormat(newFormat);
 
-    // convert current state to the new format
-    const converter =
-      newFormat === "AH" ? gregorianYearToHijriYear : hijriYearToGregorianYear;
-    setTempValue(tempValue.map(converter) as [number, number]);
-    setValue(value.map(converter) as [number, number]);
+    if (newFormat === "AH") {
+      // use URL state directly
+      setTempValue(defaultRange);
+      setValue(defaultRange);
+    } else {
+      setTempValue(tempValue.map(hijriYearToGregorianYear) as [number, number]);
+      setValue(value.map(hijriYearToGregorianYear) as [number, number]);
+    }
   };
 
   return (
