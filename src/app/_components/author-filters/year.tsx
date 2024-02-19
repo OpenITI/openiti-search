@@ -97,6 +97,9 @@ export default function YearFilter({ defaultRange, maxYear }: YearFilterProps) {
     timeoutRef.current = newTimeout;
   };
 
+  const min = format === "AH" ? 1 : hijriYearToGregorianYear(1);
+  const max = format === "AH" ? maxYear : hijriYearToGregorianYear(maxYear);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     pos: "from" | "to",
@@ -104,7 +107,7 @@ export default function YearFilter({ defaultRange, maxYear }: YearFilterProps) {
     const newValue = [...value];
 
     const inputValue = parseInt(e.target.value);
-    if (inputValue < 1 || inputValue > maxYear) return;
+    if (inputValue < min || inputValue > max) return;
 
     newValue[pos === "from" ? 0 : 1] = inputValue;
 
@@ -114,9 +117,6 @@ export default function YearFilter({ defaultRange, maxYear }: YearFilterProps) {
 
   const from = tempValue[0] !== value[0] ? tempValue[0] : value[0];
   const to = tempValue[1] !== value[1] ? tempValue[1] : value[1];
-
-  const min = format === "AH" ? 1 : hijriYearToGregorianYear(1);
-  const max = format === "AH" ? maxYear : hijriYearToGregorianYear(maxYear);
 
   const handleSliderChange = (newValues: [number, number]) => {
     setTempValue(newValues);
