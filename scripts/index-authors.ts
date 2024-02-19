@@ -94,6 +94,11 @@ await client.collections().create({
       index: false, // don't index books
       optional: true,
     },
+    {
+      name: "booksCount",
+      type: "int32",
+      optional: true,
+    }
   ],
 });
 
@@ -113,6 +118,7 @@ for (const batch of batches) {
         return {
           ...author,
           books: authorIdToBooks[author.id] ?? [],
+          booksCount: (authorIdToBooks[author.id] ?? []).length,
         };
       }),
     );
@@ -179,3 +185,4 @@ await fs.writeFile(
   JSON.stringify(tags, null, 2),
   "utf-8",
 );
+

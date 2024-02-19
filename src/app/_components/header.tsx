@@ -2,6 +2,7 @@ import SearchInput from "./search-input";
 import Container from "@/components/ui/container";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SearchMode } from "@/types/search-mode";
+import Image from "next/image";
 import Link from "next/link";
 
 const modes = [
@@ -28,7 +29,14 @@ export default function Header({
   currentMode: SearchMode;
 }) {
   return (
-    <div className="bg-blue-700 bg-gradient-to-b pb-12 pt-12 text-white sm:pt-16">
+    <div className="relative isolate bg-blue-600 bg-gradient-to-b pb-12 pt-12 text-white sm:pt-16">
+      <Image
+        fill
+        className="absolute left-0 top-0 -z-[1] h-full w-full object-cover opacity-30"
+        src="/images/bg.jpg"
+        alt="Background image"
+      />
+
       <Container>
         <div className="flex flex-col justify-between gap-10 sm:flex-row sm:items-center sm:gap-0">
           <h1 className="text-4xl font-bold">Search the OpenITI Corpus</h1>

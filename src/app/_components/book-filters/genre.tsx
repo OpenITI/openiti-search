@@ -93,7 +93,18 @@ export default function GenresFilter({ currentGenres }: GenresFilterProps) {
   }, [value, index, size, selectedGenres]);
 
   return (
-    <FilterContainer title="Genres" isLoading={isPending}>
+    <FilterContainer
+      title="Genres"
+      isLoading={isPending}
+      clearFilterHref={
+        selectedGenres.length > 0
+          ? {
+              pathname,
+              query: getGenresFilterUrlParams([]).toString(),
+            }
+          : undefined
+      }
+    >
       <Input
         placeholder="Search for a genre"
         className="font-inter"

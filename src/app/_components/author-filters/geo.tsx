@@ -99,7 +99,18 @@ export default function GeographiesFilter({
   }, [value, index, size, selectedGeographies]);
 
   return (
-    <FilterContainer title="Geo" isLoading={isPending}>
+    <FilterContainer
+      title="Geo"
+      isLoading={isPending}
+      clearFilterHref={
+        selectedGeographies.length > 0
+          ? {
+              pathname,
+              query: getGeoFilterUrlParams([]).toString(),
+            }
+          : undefined
+      }
+    >
       <Input
         placeholder="Search for a geography"
         className="font-inter"

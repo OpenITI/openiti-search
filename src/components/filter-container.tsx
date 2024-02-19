@@ -1,9 +1,13 @@
+import Link, { type LinkProps } from "next/link";
+import { Button } from "./ui/button";
 import Spinner from "./ui/spinner";
+import { XMarkIcon } from "@heroicons/react/24/solid";
 
 interface FilterContainerProps {
   title: string;
   isLoading?: boolean;
   titleChildren?: React.ReactNode;
+  clearFilterHref?: LinkProps["href"];
   children: React.ReactNode;
 }
 
@@ -11,6 +15,7 @@ export default function FilterContainer({
   title,
   isLoading,
   titleChildren,
+  clearFilterHref,
   children,
 }: FilterContainerProps) {
   return (
@@ -23,7 +28,15 @@ export default function FilterContainer({
           </span>
         </h3>
 
-        {titleChildren}
+        {clearFilterHref ? (
+          <Button variant="link" className="h-auto px-0 py-0" asChild>
+            <Link href={clearFilterHref} scroll={false}>
+              Clear all <XMarkIcon className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        ) : (
+          titleChildren
+        )}
       </div>
 
       <div className="mt-3">{children}</div>

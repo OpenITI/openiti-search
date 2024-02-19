@@ -52,6 +52,7 @@ export default function AuthorsFilter({
     const results = await searchAuthors(q, {
       page: p,
       limit: 10,
+      sortBy: "booksCount:desc,_text_match:desc",
     });
 
     setPageToResponse((prev) => ({
@@ -136,13 +137,23 @@ export default function AuthorsFilter({
   }, [pageToResponse, selectedAuthorsResponse]);
 
   return (
-    <FilterContainer title="Authors" isLoading={isPending || loading}>
+    <FilterContainer
+      title="Authors"
+      isLoading={isPending || loading}
+      clearFilterHref={
+        selectedAuthors.length > 0
+          ? {
+              pathname,
+              query: getAuthorsFilterUrlParams([]).toString(),
+            }
+          : undefined
+      }
+    >
       <Input
         placeholder="Search for an author"
         className="font-inter"
         value={value}
         onChange={handleInputChange}
-        disabled={loading}
       />
 
       <div className="font-inter mt-3 max-h-[300px] w-full space-y-3 overflow-y-scroll sm:max-h-none sm:overflow-y-auto">

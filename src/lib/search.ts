@@ -57,13 +57,11 @@ export const searchAuthors = async (q: string, options?: SearchOptions) => {
 
   const filters: string[] = [];
   if (yearRange) filters.push(`year:[${yearRange[0]}..${yearRange[1]}]`);
-  if (geographies) {
-    geographies.forEach((geo) => {
-      filters.push(`geographies:=${geo}`);
-    });
+  if (geographies && geographies.length > 0) {
+    filters.push(`geographies:[${geographies.map((geo) => `\`${geo}\``).join(", ")}]`);
   }
 
-  if (ids) {
+  if (ids && ids.length > 0) {
     filters.push(`id:[${ids.map((id) => `\`${id}\``).join(", ")}]`);
   }
 
@@ -110,9 +108,7 @@ export const searchBooks = async (q: string, options?: SearchOptions) => {
 
   const filters: string[] = [];
   if (genres && genres.length > 0) {
-    genres.forEach((genre) => {
-      filters.push(`genreTags:=${genre}`);
-    });
+    filters.push(`genreTags:[${genres.map((genre) => `\`${genre}\``).join(", ")}]`);
   }
 
   if (authors && authors.length > 0) {
