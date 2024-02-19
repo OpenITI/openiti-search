@@ -2,7 +2,6 @@
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import Spinner from "@/components/ui/spinner";
 import { getAuthorsFilterUrlParams } from "@/lib/url";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
@@ -10,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { searchAuthors } from "@/lib/search";
 import type { SearchResponse } from "typesense/lib/Typesense/Documents";
 import type { AuthorDocument } from "@/types/author";
+import FilterContainer from "@/components/filter-container";
 
 const DEBOUNCE_DELAY = 300;
 
@@ -136,17 +136,10 @@ export default function AuthorsFilter({
   }, [pageToResponse, selectedAuthorsResponse]);
 
   return (
-    <div className="relative mt-5 rounded-md bg-white p-4">
-      <h3 className="text-lg">
-        <span className="flex items-center">
-          Authors
-          {(isPending || loading) && <Spinner className="ml-2 h-4 w-4" />}
-        </span>
-      </h3>
-
+    <FilterContainer title="Authors" isLoading={isPending || loading}>
       <Input
         placeholder="Search for an author"
-        className="font-inter mt-3"
+        className="font-inter"
         value={value}
         onChange={handleInputChange}
         disabled={loading}
@@ -183,6 +176,6 @@ export default function AuthorsFilter({
           </Button>
         )}
       </div>
-    </div>
+    </FilterContainer>
   );
 }

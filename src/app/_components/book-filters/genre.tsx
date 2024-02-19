@@ -2,13 +2,13 @@
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import Spinner from "@/components/ui/spinner";
 import { getGenresFilterUrlParams } from "@/lib/url";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import genres from "../../../../data/distinct-genres.json";
 import Fuse from "fuse.js";
 import { Button } from "@/components/ui/button";
+import FilterContainer from "@/components/filter-container";
 
 const DEBOUNCE_DELAY = 300;
 
@@ -36,22 +36,6 @@ export default function GenresFilter({ currentGenres }: GenresFilterProps) {
   }, []);
 
   const [value, setValue] = useState("");
-  const matchedGenres = useMemo(() => {
-    const q = value.trim();
-    if (!q) {
-      const items = genres.slice(0, size);
-      return {
-        items,
-        hasMore: genres.length > size,
-      };
-    }
-
-    const matches = index.search(q, { limit: size }).map((r) => r.item.name);
-    return {
-      items: matches,
-      hasMore: matches.length === size,
-    };
-  }, [value, index, size]);
 
   useEffect(() => {
     setSelectedGenres(currentGenres);
@@ -82,18 +66,37 @@ export default function GenresFilter({ currentGenres }: GenresFilterProps) {
     timeoutRef.current = newTimeout;
   };
 
-  return (
-    <div className="relative mt-5 rounded-md bg-white p-4">
-      <h3 className="text-lg">
-        <span className="flex items-center">
-          Genres
-          {isPending && <Spinner className="ml-2 h-4 w-4" />}
-        </span>
-      </h3>
+  const matchedGenres = useMemo(() => {
+    const q = value.trim();
+    const selectedGenresSet = new Set(selectedGenres);
 
+    if (!q) {
+      const items = selectedGenres.concat(
+        genres.slice(0, size).filter((g) => !selectedGenresSet.has(g)),
+      );
+
+      return {
+        items,
+        hasMore: genres.length > size,
+      };
+    }
+
+    const matches = index.search(q, { limit: size }).map((r) => r.item.name);
+    const items = selectedGenres.concat(
+      matches.filter((g) => !selectedGenresSet.has(g)),
+    );
+
+    return {
+      items,
+      hasMore: matches.length === size,
+    };
+  }, [value, index, size, selectedGenres]);
+
+  return (
+    <FilterContainer title="Genres" isLoading={isPending}>
       <Input
         placeholder="Search for a genre"
-        className="font-inter mt-3"
+        className="font-inter"
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
@@ -126,6 +129,6 @@ export default function GenresFilter({ currentGenres }: GenresFilterProps) {
           </Button>
         )}
       </div>
-    </div>
+    </FilterContainer>
   );
 }

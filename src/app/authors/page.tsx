@@ -8,9 +8,18 @@ import { authorSorts } from "@/lib/url";
 import { type InferPagePropsType } from "next-typesafe-url";
 import { withParamValidation } from "next-typesafe-url/app/hoc";
 import { Route, type RouteType } from "./routeType";
-import YearFilter from "../_components/author-filters/year";
 import GeographiesFilter from "../_components/author-filters/geo";
 import { gregorianYearToHijriYear } from "@/lib/date";
+import dynamicFn from "next/dynamic";
+import YearFilterSkeleton from "../_components/author-filters/year-skeleton";
+
+const YearFilter = dynamicFn(
+  () => import("../_components/author-filters/year"),
+  {
+    ssr: false,
+    loading: () => <YearFilterSkeleton defaultRange={[0, 0]} maxYear={0} />,
+  },
+);
 
 type HomePageProps = InferPagePropsType<RouteType>;
 

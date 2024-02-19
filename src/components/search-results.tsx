@@ -67,13 +67,13 @@ export default function SearchResults<T extends object & { id: string }>({
                         <DrawerTitle>Filters</DrawerTitle>
                       </DrawerHeader>
 
-                      <div className="max-h-[70vh] overflow-y-scroll">
+                      <div className="mt-5 flex max-h-[70svh] flex-col gap-5 overflow-y-scroll">
                         {filters}
                       </div>
 
                       <DrawerFooter>
                         <DrawerClose asChild>
-                          <Button variant="outline">Cancel</Button>
+                          <Button variant="outline">Close</Button>
                         </DrawerClose>
                       </DrawerFooter>
                     </DrawerContent>
@@ -111,7 +111,7 @@ export default function SearchResults<T extends object & { id: string }>({
           <h2 className="text-2xl">Filters</h2>
         </div>
 
-        {filters}
+        <div className="mt-5 flex flex-col gap-5">{filters}</div>
       </div>
     </div>
   );

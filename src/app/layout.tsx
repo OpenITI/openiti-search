@@ -23,6 +23,7 @@ const interFont = Inter({
 });
 
 export const metadata = {
+  metadataBase: new URL("https://openiti-search.vercel.app"),
   title: "OpenITI Search",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
   openGraph: {
@@ -70,7 +71,7 @@ export default function RootLayout({
         interFont.variable,
       )}
     >
-      <body className="bg-gray-200">
+      <body className="bg-white">
         <main className="min-h-screen w-full pb-40">{children}</main>
       </body>
     </html>

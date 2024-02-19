@@ -20,7 +20,7 @@ export default function SearchResultItem({
   return (
     <div
       className={cn(
-        "relative flex w-full flex-col gap-2 rounded-md bg-white p-4 pl-16",
+        "relative flex w-full flex-col gap-2 rounded-md border border-gray-300 p-4 pl-16 shadow-sm",
         !open && "h-[100px] justify-center",
       )}
     >

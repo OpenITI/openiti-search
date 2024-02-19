@@ -50,6 +50,7 @@ async function BooksPage({ searchParams }: BooksPageProps) {
                 currentAuthors={authors}
                 selectedAuthorsResponse={results.selectedAuthors}
               />
+
               <GenresFilter currentGenres={genres} />
             </>
           }

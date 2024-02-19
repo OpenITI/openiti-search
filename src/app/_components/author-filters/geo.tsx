@@ -2,13 +2,13 @@
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import Spinner from "@/components/ui/spinner";
 import { getGeoFilterUrlParams } from "@/lib/url";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import geographies from "../../../../data/distinct-tags.json";
 import Fuse from "fuse.js";
 import { Button } from "@/components/ui/button";
+import FilterContainer from "@/components/filter-container";
 
 const DEBOUNCE_DELAY = 300;
 
@@ -41,23 +41,6 @@ export default function GeographiesFilter({
   const [value, setValue] = useState("");
   const [size, setSize] = useState(10);
 
-  const matchedGeographies = useMemo(() => {
-    const q = value.trim();
-    if (!q) {
-      const hasMore = geographies.length > size;
-      return {
-        items: geographies.slice(0, size),
-        hasMore,
-      };
-    }
-
-    const matches = index.search(q, { limit: size }).map((r) => r.item.name);
-    return {
-      items: matches,
-      hasMore: matches.length === size,
-    };
-  }, [value, index, size]);
-
   useEffect(() => {
     setSelectedGeographies(currentGeographies);
   }, [currentGeographies]);
@@ -87,18 +70,39 @@ export default function GeographiesFilter({
     timeoutRef.current = newTimeout;
   };
 
-  return (
-    <div className="relative mt-5 rounded-md bg-white p-4">
-      <h3 className="text-lg">
-        <span className="flex items-center">
-          Geo
-          {isPending && <Spinner className="ml-2 h-4 w-4" />}
-        </span>
-      </h3>
+  const matchedGeographies = useMemo(() => {
+    const q = value.trim();
+    const selectedGeographiesSet = new Set(selectedGeographies);
 
+    if (!q) {
+      const items = selectedGeographies.concat(
+        geographies
+          .slice(0, size)
+          .filter((g) => !selectedGeographiesSet.has(g)),
+      );
+
+      return {
+        items,
+        hasMore: geographies.length > size,
+      };
+    }
+
+    const matches = index.search(q, { limit: size }).map((r) => r.item.name);
+    const items = selectedGeographies.concat(
+      matches.filter((g) => !selectedGeographiesSet.has(g)),
+    );
+
+    return {
+      items,
+      hasMore: matches.length === size,
+    };
+  }, [value, index, size, selectedGeographies]);
+
+  return (
+    <FilterContainer title="Geo" isLoading={isPending}>
       <Input
         placeholder="Search for a geography"
-        className="font-inter mt-3"
+        className="font-inter"
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
@@ -137,6 +141,6 @@ export default function GeographiesFilter({
           </Button>
         )}
       </div>
-    </div>
+    </FilterContainer>
   );
 }
