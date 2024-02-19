@@ -3,7 +3,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { getAuthorsFilterUrlParams } from "@/lib/url";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { searchAuthors } from "@/lib/search";
@@ -15,11 +15,13 @@ const DEBOUNCE_DELAY = 300;
 
 interface AuthorsFilterProps {
   currentAuthors: string[];
+  initialAuthorsResponse: Awaited<ReturnType<typeof searchAuthors>>;
   selectedAuthorsResponse: SearchResponse<AuthorDocument> | null;
 }
 
 export default function AuthorsFilter({
   currentAuthors,
+  initialAuthorsResponse,
   selectedAuthorsResponse,
 }: AuthorsFilterProps) {
   const [selectedAuthors, setSelectedAuthors] =
@@ -34,9 +36,12 @@ export default function AuthorsFilter({
   const [value, setValue] = useState("");
   const [pageToResponse, setPageToResponse] = useState<
     Record<number, Awaited<ReturnType<typeof searchAuthors>>>
-  >({});
-  const [loading, setIsLoading] = useState(true);
+  >({
+    1: initialAuthorsResponse,
+  });
+  const [loading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setSelectedAuthors(currentAuthors);
@@ -61,10 +66,6 @@ export default function AuthorsFilter({
     }));
     setIsLoading(false);
   };
-
-  useEffect(() => {
-    fetchAuthors("", 1);
-  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -97,7 +98,7 @@ export default function AuthorsFilter({
     }
     setSelectedAuthors(newSelectedAuthors);
 
-    const params = getAuthorsFilterUrlParams(newSelectedAuthors);
+    const params = getAuthorsFilterUrlParams(newSelectedAuthors, searchParams);
 
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -115,8 +116,8 @@ export default function AuthorsFilter({
 
   const data = useMemo(() => {
     const allResponses = Object.values(pageToResponse);
-    const hasMore = allResponses[allResponses.length - 1]?.pagination.hasNext;
-    const items = allResponses.flatMap((r) => r.results.hits ?? []);
+    const hasMore = allResponses[allResponses.length - 1]?.pagination?.hasNext;
+    const items = allResponses.flatMap((r) => r?.results?.hits ?? []);
 
     if (!selectedAuthorsResponse) {
       return {
@@ -144,7 +145,7 @@ export default function AuthorsFilter({
         selectedAuthors.length > 0
           ? {
               pathname,
-              query: getAuthorsFilterUrlParams([]).toString(),
+              query: getAuthorsFilterUrlParams([], searchParams).toString(),
             }
           : undefined
       }

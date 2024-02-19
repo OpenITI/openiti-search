@@ -58,7 +58,9 @@ export const searchAuthors = async (q: string, options?: SearchOptions) => {
   const filters: string[] = [];
   if (yearRange) filters.push(`year:[${yearRange[0]}..${yearRange[1]}]`);
   if (geographies && geographies.length > 0) {
-    filters.push(`geographies:[${geographies.map((geo) => `\`${geo}\``).join(", ")}]`);
+    filters.push(
+      `geographies:[${geographies.map((geo) => `\`${geo}\``).join(", ")}]`,
+    );
   }
 
   if (ids && ids.length > 0) {
@@ -108,7 +110,9 @@ export const searchBooks = async (q: string, options?: SearchOptions) => {
 
   const filters: string[] = [];
   if (genres && genres.length > 0) {
-    filters.push(`genreTags:[${genres.map((genre) => `\`${genre}\``).join(", ")}]`);
+    filters.push(
+      `genreTags:[${genres.map((genre) => `\`${genre}\``).join(", ")}]`,
+    );
   }
 
   if (authors && authors.length > 0) {
@@ -141,6 +145,14 @@ export const searchBooks = async (q: string, options?: SearchOptions) => {
       ...(options?.sortBy && { sort_by: options.sortBy }),
       ...(filters.length > 0 && { filter_by: filters.join(" && ") }),
     },
+    {
+      collection: AUTHORS_INDEX,
+      q: "",
+      query_by: "primaryArabicName",
+      limit: 10,
+      page: 1,
+      sort_by: "booksCount:desc,_text_match:desc",
+    },
     ...(authors && authors.length > 0
       ? [
           {
@@ -154,14 +166,23 @@ export const searchBooks = async (q: string, options?: SearchOptions) => {
         ]
       : []),
   ])) as {
-    results: [SearchResponse<BookDocument>, SearchResponse<AuthorDocument>];
+    results: [
+      SearchResponse<BookDocument>,
+      SearchResponse<AuthorDocument>,
+      SearchResponse<AuthorDocument>,
+    ];
   };
 
-  const [booksResults, selectedAuthorsResults] = results.results;
+  const [booksResults, initialAuthors, selectedAuthorsResults] =
+    results.results;
 
   return {
     results: booksResults,
     pagination: makePagination(booksResults.found, booksResults.page, limit),
+    initialAuthors: {
+      results: initialAuthors,
+      pagination: makePagination(initialAuthors.found, initialAuthors.page, 10),
+    },
     selectedAuthors: selectedAuthorsResults ?? null,
   };
 };

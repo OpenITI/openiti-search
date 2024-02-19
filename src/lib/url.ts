@@ -1,3 +1,5 @@
+import { ReadonlyURLSearchParams } from "next/navigation";
+
 // when the search query changes
 export const getQueryUrlParams = (term: string) => {
   const oldParams = new URLSearchParams(window.location.search);
@@ -73,8 +75,11 @@ export const getGenresFilterUrlParams = (genres: string[]) => {
   return params;
 };
 
-export const getAuthorsFilterUrlParams = (authors: string[]) => {
-  const params = new URLSearchParams(window.location.search);
+export const getAuthorsFilterUrlParams = (
+  authors: string[],
+  oldParams: ReadonlyURLSearchParams,
+) => {
+  const params = new URLSearchParams(oldParams.toString());
 
   // make sure to reset pagination state
   if (params.has("page")) {
